@@ -38,6 +38,7 @@ namespace Banana
 	{
 	public:
 		void AddAttribute(Type type);
+		// WARNING: This is unfinished
 		void AddAttributeInstance(Type type, unsigned int num);
 
 		std::vector<Attribute> GetAttributes() const { return m_Attributes; }
@@ -66,7 +67,7 @@ namespace Banana
 		{
 			Attribute attribute = m_Layout.GetAttributes()[attributeIndex];
 			glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-			glBufferSubData(GL_ARRAY_BUFFER, attribute.AttributeIndex * attribute.Size * m_NumVertices, data.size() * attribute.NumData, data.data());
+			glBufferSubData(GL_ARRAY_BUFFER, attribute.AttributeIndex * sizeof(T) * m_NumVertices, data.size() * sizeof(T), &data[0]);
 		}
 		
 		template <typename T>

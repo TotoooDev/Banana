@@ -23,5 +23,7 @@ void main()
 	// Out.Normal = mat3(transpose(inverse(uModel))) * aNormal; // The inverse function is costly for th GPU apparently
 
 	// gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0);
+	Out.FragPos = aPos;
+	Out.Normal = aNormal;
 	gl_Position = vec4(aPos, 1.0);
 }

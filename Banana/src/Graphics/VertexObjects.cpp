@@ -28,20 +28,21 @@ namespace Banana
 
 	void VertexLayout::AddAttributeInstance(Type type, unsigned int num)
 	{
-		unsigned int size;
+		unsigned int size = 0;
+		unsigned int numData = 0;
 		switch (type)
 		{
-		case Type::Float: size = sizeof(float); break;
-		case Type::Vec2: size = sizeof(float) * 2; break;
-		case Type::Vec3: size = sizeof(float) * 3; break;
-		case Type::Vec4: size = sizeof(float) * 4; break;
-		case Type::Mat4: size = sizeof(float) * 16; break;
+		case Type::Float: size = sizeof(float); numData = 1; break;
+		case Type::Vec2: size = sizeof(float) * 2; numData = 2; break;
+		case Type::Vec3: size = sizeof(float) * 3; numData = 3; break;
+		case Type::Vec4: size = sizeof(float) * 4; numData = 4; break;
+		case Type::Mat4: size = sizeof(float) * 16; numData = 16; break;
 		}
 
-		Attribute attribute = { type, m_AttributeIndex, size };
+		Attribute attribute = { type, m_AttributeIndex, size, numData };
 		m_AttributesInstance.push_back(attribute);
 
-		m_InstanceSize += size;
+		m_VertexSize += size;
 
 		m_AttributeIndex++;
 		// If the attribute is a mat4 (which is basically 4 vec4s) we need to increment the attribute index by 4
@@ -56,7 +57,7 @@ namespace Banana
 		glGenVertexArrays(1, &m_VAO);
 		glGenBuffers(1, &m_VBO);
 		// No need to create an instance VBO if we don't use instancing
-		if (m_Layout.GetInstanceSize() >= 0)
+		if (m_Layout.GetInstanceSize() > 0)
 			glGenBuffers(1, &m_InstanceVBO);
 
 		glBindVertexArray(m_VAO);
@@ -74,34 +75,36 @@ namespace Banana
 
 		// Set the attributes layout
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+		unsigned int offset = 0;
 		for (auto& attribute : m_Layout.GetAttributes())
 		{
-			unsigned int offset = 0;
+			glEnableVertexAttribArray(attribute.AttributeIndex);
 			glVertexAttribPointer(attribute.AttributeIndex, attribute.NumData, GL_FLOAT, GL_FALSE, 0, (void*)offset);
 			switch (attribute.DataType)
 			{
-			case Type::Float: offset += 1 * m_NumVertices; break;
-			case Type::Vec2: offset += 2 * m_NumVertices; break;
-			case Type::Vec3: offset += 3 * m_NumVertices; break;
-			case Type::Vec4: offset += 4 * m_NumVertices; break;
-			case Type::Mat4: offset += 16 * m_NumVertices; break;
+			case Type::Float: offset += sizeof(float) * 1 * m_NumVertices; break;
+			case Type::Vec2: offset += sizeof(float) * 2 * m_NumVertices; break;
+			case Type::Vec3: offset += sizeof(float) * 3 * m_NumVertices; break;
+			case Type::Vec4: offset += sizeof(float) * 4 * m_NumVertices; break;
+			case Type::Mat4: offset += sizeof(float) * 16 * m_NumVertices; break;
 			}
 		}
 
 		if (m_InstanceVBO != 0)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVBO);
+			offset = 0;
 			for (auto& attribute : m_Layout.GetAttributesInstance())
 			{
-				unsigned int offset = 0;
+				glEnableVertexAttribArray(attribute.AttributeIndex);
 				glVertexAttribPointer(attribute.AttributeIndex, attribute.NumData, GL_FLOAT, GL_FALSE, 0, (void*)offset);
 				switch (attribute.DataType)
 				{
-				case Type::Float: offset += 1 * m_NumVertices; break;
-				case Type::Vec2: offset += 2 * m_NumVertices; break;
-				case Type::Vec3: offset += 3 * m_NumVertices; break;
-				case Type::Vec4: offset += 4 * m_NumVertices; break;
-				case Type::Mat4: offset += 16 * m_NumVertices; break;
+				case Type::Float: offset += sizeof(float) * 1 * m_NumVertices; break;
+				case Type::Vec2: offset += sizeof(float) * 2 * m_NumVertices; break;
+				case Type::Vec3: offset += sizeof(float) * 3 * m_NumVertices; break;
+				case Type::Vec4: offset += sizeof(float) * 4 * m_NumVertices; break;
+				case Type::Mat4: offset += sizeof(float) * 16 * m_NumVertices; break;
 				}
 			}
 		}

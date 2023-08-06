@@ -16,6 +16,11 @@ namespace Banana
 		m_CurrentProjection = glm::perspective(fov, aspectRatio, near, far);
 	}
 
+	void Renderer::OnViewportResize(unsigned int width, unsigned int height)
+	{
+		glViewport(0, 0, width, height);
+	}
+
 	void Renderer::SetTarget(Ref<Framebuffer> target)
 	{
 		m_Target = target;

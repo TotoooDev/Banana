@@ -16,7 +16,7 @@ namespace Banana
 		static Renderer* Get();
 
 		void SetProjection(float fov, float aspectRatio, float near, float far);
-		void OnViewportResize(unsigned int width, unsigned int height) {}
+		void OnViewportResize(unsigned int width, unsigned int height);
 
 		// Set to nullptr to draw to the screen
 		void SetTarget(Ref<Framebuffer> target);
