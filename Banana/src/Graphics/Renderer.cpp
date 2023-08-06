@@ -2,6 +2,8 @@
 
 namespace Banana
 {
+	Renderer* Renderer::m_Instance = nullptr;
+
 	Renderer* Renderer::Get()
 	{
 		if (!m_Instance)

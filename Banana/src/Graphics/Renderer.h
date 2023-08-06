@@ -5,15 +5,15 @@ namespace Banana
 	class Renderer
 	{
 	public:
-		Renderer() = delete;
+		Renderer(Renderer&) = delete;
 		void operator=(const Renderer&) = delete;
 
-		Renderer* Get();
+		static Renderer* Get();
 
 	private:
 		Renderer() {}
 
 	private:
-		Renderer* m_Instance;
+		static Renderer* m_Instance;
 	};
 }
