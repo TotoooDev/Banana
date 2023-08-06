@@ -19,8 +19,9 @@ uniform mat4 uProjection;
 
 void main()
 {
-	Out.FragPos = vec3(uModel * vec4(aPos, 1.0));
-	Out.Normal = mat3(transpose(inverse(uModel))) * aNormal; // The inverse function is costly for th GPU apparently
+	// Out.FragPos = vec3(uModel * vec4(aPos, 1.0));
+	// Out.Normal = mat3(transpose(inverse(uModel))) * aNormal; // The inverse function is costly for th GPU apparently
 
-	gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0);
+	// gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0);
+	gl_Position = vec4(aPos, 1.0);
 }

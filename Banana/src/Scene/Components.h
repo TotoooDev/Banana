@@ -1,10 +1,9 @@
 #pragma once
 #include <Core/Ref.h>
-#include <Graphics/Mesh.h>
 #include <Graphics/Camera.h>
-#include <Graphics/Mesh.h>
-#include <Graphics/Light.h>
-#include <Graphics/Cubemap.h>
+// #include <Graphics/Mesh.h>
+// #include <Graphics/Light.h>
+// #include <Graphics/Cubemap.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <functional>
@@ -35,45 +34,55 @@ namespace Banana
 	};
 
 	// Graphics
-	struct DirectionalLightComponent
+	// struct DirectionalLightComponent
+	// {
+	// 	DirectionalLight Light;
+	// 	bool Emit = true;
+	// 
+	// 	DirectionalLightComponent() {}
+	// 	DirectionalLightComponent(DirectionalLight light)
+	// 		: Light(light) {}
+	// 	DirectionalLightComponent(const DirectionalLightComponent&) = default;
+	// };
+	// struct PointLightComponent
+	// {
+	// 	PointLight Light;
+	// 	bool Emit = true;
+	// 
+	// 	PointLightComponent() {}
+	// 	PointLightComponent(PointLight light)
+	// 		: Light(light) {}
+	// 	PointLightComponent(const PointLightComponent&) = default;
+	// };
+	// struct SpotLightComponent
+	// {
+	// 	SpotLight Light;
+	// 	bool Emit = true;
+	// 
+	// 	SpotLightComponent() {}
+	// 	SpotLightComponent(SpotLight light)
+	// 		: Light(light) {}
+	// 	SpotLightComponent(const SpotLightComponent&) = default;
+	// };
+
+	// struct MeshComponent
+	// {
+	// 	Ref<Banana::Model> Model;
+	// 	bool Draw = true;
+	// 
+	// 	MeshComponent(Ref<Banana::Model> model)
+	// 		: Model(model) {}
+	// 	MeshComponent(const MeshComponent&) = default;
+	// };
+
+	struct VertexObjectComponent
 	{
-		DirectionalLight Light;
-		bool Emit = true;
+		Ref<VAO> ObjectVAO;
+		Ref<EBO> ObjectEBO;
 
-		DirectionalLightComponent() {}
-		DirectionalLightComponent(DirectionalLight light)
-			: Light(light) {}
-		DirectionalLightComponent(const DirectionalLightComponent&) = default;
-	};
-	struct PointLightComponent
-	{
-		PointLight Light;
-		bool Emit = true;
-
-		PointLightComponent() {}
-		PointLightComponent(PointLight light)
-			: Light(light) {}
-		PointLightComponent(const PointLightComponent&) = default;
-	};
-	struct SpotLightComponent
-	{
-		SpotLight Light;
-		bool Emit = true;
-
-		SpotLightComponent() {}
-		SpotLightComponent(SpotLight light)
-			: Light(light) {}
-		SpotLightComponent(const SpotLightComponent&) = default;
-	};
-
-	struct MeshComponent
-	{
-		Ref<Banana::Model> Model;
-		bool Draw = true;
-
-		MeshComponent(Ref<Banana::Model> model)
-			: Model(model) {}
-		MeshComponent(const MeshComponent&) = default;
+		VertexObjectComponent(Ref<VAO> vao, Ref<EBO> ebo)
+			: ObjectVAO(vao), ObjectEBO(ebo) {}
+		VertexObjectComponent(const VertexObjectComponent&) = default;
 	};
 
 	struct ShaderComponent
@@ -85,15 +94,15 @@ namespace Banana
 		ShaderComponent(const ShaderComponent&) = default;
 	};
 
-	struct SkyboxComponent
-	{
-		Ref<Cubemap> Skybox;
-		bool Draw = true;
-
-		SkyboxComponent(Ref<Cubemap> skybox)
-			: Skybox(skybox) {}
-		SkyboxComponent(const SkyboxComponent&) = default;
-	};
+	// struct SkyboxComponent
+	// {
+	// 	Ref<Cubemap> Skybox;
+	// 	bool Draw = true;
+	// 
+	// 	SkyboxComponent(Ref<Cubemap> skybox)
+	// 		: Skybox(skybox) {}
+	// 	SkyboxComponent(const SkyboxComponent&) = default;
+	// };
 
 	struct CameraComponent
 	{

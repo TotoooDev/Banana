@@ -54,51 +54,13 @@ namespace Banana
 		auto camView = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto&& [camEntity, camTransform, camera] : camView.each())
 		{
-			Renderer::Get()->BeginScene(camTransform.Translation, camera.Cam->GetViewMatrix(camTransform.Translation));
-
-			// Set lights
-			auto dirLightView = m_Registry.view<DirectionalLightComponent>();
-			for (auto&& [entity, light] : dirLightView.each())
-			{
-				auto ent = Entity(entity, this);
-				if (light.Emit)
-					Renderer::Get()->AddDirectionalLight(light.Light);
-			}
-			auto pointLightView = m_Registry.view<TransformComponent, PointLightComponent>();
-			for (auto&& [entity, transform, light] : pointLightView.each())
-			{
-				auto ent = Entity(entity, this);
-				if (light.Emit)
-					Renderer::Get()->AddPointLight(transform.Translation, light.Light);
-			}
-			auto spotLightView = m_Registry.view<TransformComponent, SpotLightComponent>();
-			for (auto&& [entity, transform, light] : spotLightView.each())
-			{
-				auto ent = Entity(entity, this);
-				if (light.Emit)
-					Renderer::Get()->AddSpotLight(transform.Translation, light.Light);
-			}
-
+			Renderer::Get()->BeginScene(camera.Cam, camTransform.Translation);
+			
 			// Draw stuff
-			auto meshView = m_Registry.view<TransformComponent, MeshComponent>();
-			for (auto&& [entity, transform, mesh] : meshView.each())
+			auto vertexObjectView = m_Registry.view<TransformComponent, VertexObjectComponent>();
+			for (auto&& [entity, transform, vertexObject] : vertexObjectView.each())
 			{
-				auto ent = Entity(entity, this);
-				if (ent.HasComponent<ShaderComponent>())
-					Renderer::Get()->SetCustomShader(&ent.GetComponent<ShaderComponent>().Shader);
-				if (mesh.Draw)
-					Renderer::Get()->Draw(mesh.Model, transform.GetTransfrom());
-				if (ent.HasComponent<ShaderComponent>())
-					Renderer::Get()->SetCustomShader(nullptr);
-			}
-
-			// Draw the skyboxes last
-			auto skyboxView = m_Registry.view<SkyboxComponent>();
-			for (auto&& [entity, skybox] : skyboxView.each())
-			{
-				auto ent = Entity(entity, this);
-				if (skybox.Draw)
-					Renderer::Get()->Draw(skybox.Skybox);
+				Renderer::Get()->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO);
 			}
 
 			Renderer::Get()->EndScene();

@@ -75,7 +75,7 @@ namespace Banana
         glAttachShader(m_ID, fragmentShader);
         glLinkProgram(m_ID);
         // Error handling
-        glGetShaderiv(m_ID, GL_LINK_STATUS, &success);
+        glGetProgramiv(m_ID, GL_LINK_STATUS, &success);
         if (!success)
         {
             glGetProgramInfoLog(m_ID, sizeof(infoLog), nullptr, infoLog);
