@@ -46,17 +46,37 @@ namespace Banana
 		m_CurrentView = glm::mat4(1.0f);
 	}
 
-	void Renderer::Draw(Ref<VAO> vao, Ref<EBO> ebo)
+	void Renderer::Draw(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)
 	{
+		if (m_CustomShader)
+			m_CurrentShader = m_CustomShader.get();
+		else
+			m_CurrentShader = &m_ShaderColor;
+
 		if (m_Target)
 			m_Target->Bind();
 
-		m_ShaderColor.Bind();
+		m_CurrentShader->Bind();
+		m_CurrentShader->SetMat4(transform, "uModel");
+		m_CurrentShader->SetMat4(m_CurrentView, "uView");
+		m_CurrentShader->SetMat4(m_CurrentProjection, "uProjection");
+		m_CurrentShader->SetVec3(material.ColorDiffuse, "uColor");
 
 		vao->Bind();
 		ebo->Bind();
 
 		glDrawElements(GL_TRIANGLES, ebo->GetCount(), GL_UNSIGNED_INT, 0);
+	}
+
+	void Renderer::Draw(Mesh mesh, Material material, glm::mat4 transform)
+	{
+		Draw(mesh.GetVAO(), mesh.GetEBO(), material, transform * mesh.GetTransform());
+	}
+
+	void Renderer::Draw(Ref<Model> model, std::vector<Material> materials, glm::mat4 transform)
+	{
+		for (auto& mesh : model->GetMeshes())
+			Draw(mesh, materials[mesh.GetMaterialIndex()], transform);
 	}
 
 	Renderer* Renderer::Get()

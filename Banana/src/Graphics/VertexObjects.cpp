@@ -106,6 +106,10 @@ namespace Banana
 				case Type::Vec4: offset += sizeof(float) * 4 * m_NumVertices; break;
 				case Type::Mat4: offset += sizeof(float) * 16 * m_NumVertices; break;
 				}
+				
+				// Set divisor
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glVertexAttribDivisor(attribute.AttributeIndex, 1);
 			}
 		}
 	}

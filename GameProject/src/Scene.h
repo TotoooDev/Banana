@@ -16,38 +16,20 @@ public:
 
 		m_Model = CreateEntity();
 		m_Model.AddComponent<TransformComponent>();
-		
-		VertexLayout layout;
-		layout.AddAttribute(Type::Vec3); // Position
-		layout.AddAttribute(Type::Vec3); // Color
-
-		std::vector<glm::vec3> positions =
-		{
-			glm::vec3(-0.5f, -0.5f, 0.0f),
-			glm::vec3(0.5f, -0.5f, 0.0f),
-			glm::vec3(0.0f,  0.5f, 0.0f)
-		};
-		std::vector<glm::vec3> colors =
-		{
-			glm::vec3(1.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 1.0f)
-		};
-
-		Ref<VAO> vao = CreateRef<VAO>(layout, 3);
-		vao->SetData(0, positions);
-		vao->SetData(1, colors);
-
-		std::vector<unsigned int> indices = { 0, 1, 2 };
-		Ref<EBO> ebo = CreateRef<EBO>();
-		ebo->SetData(indices);
-
-		m_Model.AddComponent<VertexObjectComponent>(vao, ebo);
-
+		auto& modelComponent = m_Model.AddComponent<ModelComponent>(CreateRef<Model>("Peach.fbx"));
+		m_Model.AddComponent<MaterialComponent>(modelComponent.Model->LoadMaterials());
 
 		m_Camera = CreateEntity();
 		m_Camera.AddComponent<TransformComponent>();
 		m_Camera.AddComponent<CameraComponent>(CreateRef<Camera>());
+		auto& camImGui = m_Camera.AddComponent<ImGuiComponent>();
+		camImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
+		{
+			auto& transform = ent.GetComponent<TransformComponent>();
+			ImGui::Begin("Camera");
+			ImGui::DragFloat3("Pos", glm::value_ptr(transform.Translation), 0.1f);
+			ImGui::End();
+		};
 
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResied);
 	}

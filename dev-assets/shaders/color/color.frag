@@ -37,7 +37,7 @@ struct Light
 #define MAX_LIGHTS 64
 
 // Uniforms
-uniform vec4 uColor;
+uniform vec3 uColor;
 uniform Light uLights[MAX_LIGHTS];
 uniform int uNumLights;
 uniform vec3 uCameraPos;
@@ -76,8 +76,8 @@ void main()
 	// Gamma correction
 	result = pow(result, vec3(1.0/2.2));
 
-	// FragColor = vec4(result, 1.0f);
-	FragColor = vec4(Out.Normal, 1.0);
+	// FragColor = vec4(result, 1.0);
+	FragColor = vec4(uColor, 1.0);
 }
 
 // Function definitions
@@ -90,9 +90,9 @@ vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir)
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
     // combine results
-    vec3 ambient = light.Ambient * pow(uColor.rgb, vec3(2.2f));
-    vec3 diffuse = light.Diffuse * diff * pow(uColor.rgb, vec3(2.2f));
-    vec3 specular = light.Specular * spec * uColor.rgb;
+    vec3 ambient = light.Ambient * pow(uColor, vec3(2.2f));
+    vec3 diffuse = light.Diffuse * diff * pow(uColor, vec3(2.2f));
+    vec3 specular = light.Specular * spec * uColor;
     return (ambient + diffuse + specular);
 }
 
@@ -108,9 +108,9 @@ vec3 CalculatePointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float distance = length(light.Pos - fragPos);
     float attenuation = 1.0 / (light.Constant + light.Linear * distance);    
     // combine results
-    vec3 ambient = light.Ambient * pow(uColor.rgb, vec3(2.2f));
-    vec3 diffuse = light.Diffuse * diff * pow(uColor.rgb, vec3(2.2f));
-    vec3 specular = light.Specular * spec * uColor.rgb;
+    vec3 ambient = light.Ambient * pow(uColor, vec3(2.2f));
+    vec3 diffuse = light.Diffuse * diff * pow(uColor, vec3(2.2f));
+    vec3 specular = light.Specular * spec * uColor;
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
@@ -133,9 +133,9 @@ vec3 CalculateSpotLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float epsilon = light.CutOff - light.OuterCutOff;
     float intensity = clamp((theta - light.OuterCutOff) / epsilon, 0.0, 1.0);
     // combine results
-    vec3 ambient = light.Ambient * pow(uColor.rgb, vec3(2.2f));
-    vec3 diffuse = light.Diffuse * diff * pow(uColor.rgb, vec3(2.2f));
-    vec3 specular = light.Specular * spec * uColor.rgb;
+    vec3 ambient = light.Ambient * pow(uColor, vec3(2.2f));
+    vec3 diffuse = light.Diffuse * diff * pow(uColor, vec3(2.2f));
+    vec3 specular = light.Specular * spec * uColor;
     ambient *= attenuation * intensity;
     diffuse *= attenuation * intensity;
     specular *= attenuation * intensity;

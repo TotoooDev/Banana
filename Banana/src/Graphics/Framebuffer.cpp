@@ -9,7 +9,7 @@ namespace Banana
 		glGenFramebuffers(1, &m_ID);
 	}
 
-	Framebuffer::Framebuffer(const FramebufferSpecification& spec)
+	Framebuffer::Framebuffer(const FramebufferSpecs& spec)
 		: m_Spec(spec)
 	{
 		Recreate();

@@ -67,13 +67,18 @@ namespace Banana
 		{
 			Attribute attribute = m_Layout.GetAttributes()[attributeIndex];
 			glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-			glBufferSubData(GL_ARRAY_BUFFER, attribute.AttributeIndex * sizeof(T) * m_NumVertices, data.size() * sizeof(T), &data[0]);
+			unsigned int offset = 0;
+			for (unsigned int i = 0; i < attributeIndex; i++)
+				offset += m_Layout.GetAttributes()[i].Size;
+			glBufferSubData(GL_ARRAY_BUFFER, offset * m_NumVertices, data.size() * sizeof(T), &data[0]);
 		}
 		
 		template <typename T>
 		void SetDataInstance(unsigned int attributeIndex, std::vector<T> data)
 		{
-			// TODO: Set instance data
+			Attribute attribute = m_Layout.GetAttributesInstance()[attributeIndex];
+			glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVBO);
+			glBufferSubData(GL_ARRAY_BUFFER, attribute.AttributeIndex * sizeof(T) * m_NumVertices, data.size() * sizeof(T), &data[0]);
 		}
 
 		void Bind();

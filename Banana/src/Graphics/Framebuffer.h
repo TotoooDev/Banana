@@ -14,10 +14,10 @@ namespace Banana
 		Depth24Stencil8
 	};
 
-	class FramebufferSpecification
+	class FramebufferSpecs
 	{
 	public:
-		FramebufferSpecification() = default;
+		FramebufferSpecs() = default;
 
 		void AddTexture(FramebufferTexture texture)
 		{
@@ -42,12 +42,12 @@ namespace Banana
 	{
 	public:
 		Framebuffer();
-		Framebuffer(const FramebufferSpecification& spec);
+		Framebuffer(const FramebufferSpecs& spec);
 
 		void Bind();
 		void Unbind();
 
-		void SetSpecification(const FramebufferSpecification& spec) { m_Spec = spec; Recreate(); }
+		void SetSpecification(const FramebufferSpecs& spec) { m_Spec = spec; Recreate(); }
 		void Recreate();
 		void Resize(unsigned int width, unsigned int height);
 
@@ -58,13 +58,13 @@ namespace Banana
 		void ClearAttachmentTexture(unsigned int id, unsigned int value);
 		void ClearAllAttachmentTextures(unsigned int value);
 
-		FramebufferSpecification GetSpec() const { return m_Spec; }
+		FramebufferSpecs GetSpec() const { return m_Spec; }
 		unsigned int GetID() const { return m_ID; }
 
 	private:
 		void FramebufferTextureFormatToGL(FramebufferTexture texture, unsigned int* format, unsigned int* type);
 
-		FramebufferSpecification m_Spec;
+		FramebufferSpecs m_Spec;
 
 		std::vector<unsigned int> m_ColorAttachments;
 		unsigned int m_DepthAttachment = -1;

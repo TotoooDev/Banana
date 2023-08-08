@@ -1,7 +1,10 @@
 #pragma once
 #include <Core/Ref.h>
+#include <Scene/Entity.h>
+#include <Graphics/Shader.h>
 #include <Graphics/Camera.h>
-// #include <Graphics/Mesh.h>
+#include <Graphics/Material.h>
+ #include <Graphics/Mesh.h>
 // #include <Graphics/Light.h>
 // #include <Graphics/Cubemap.h>
 #include <glm/glm.hpp>
@@ -65,20 +68,21 @@ namespace Banana
 	// 	SpotLightComponent(const SpotLightComponent&) = default;
 	// };
 
-	// struct MeshComponent
-	// {
-	// 	Ref<Banana::Model> Model;
-	// 	bool Draw = true;
-	// 
-	// 	MeshComponent(Ref<Banana::Model> model)
-	// 		: Model(model) {}
-	// 	MeshComponent(const MeshComponent&) = default;
-	// };
+	struct ModelComponent
+	{
+		Ref<Banana::Model> Model;
+		bool Draw = true;
+	
+		ModelComponent(Ref<Banana::Model> model)
+			: Model(model) {}
+		ModelComponent(const ModelComponent&) = default;
+	};
 
 	struct VertexObjectComponent
 	{
 		Ref<VAO> ObjectVAO;
 		Ref<EBO> ObjectEBO;
+		bool Draw = true;
 
 		VertexObjectComponent(Ref<VAO> vao, Ref<EBO> ebo)
 			: ObjectVAO(vao), ObjectEBO(ebo) {}
@@ -92,6 +96,16 @@ namespace Banana
 		ShaderComponent(Banana::Shader shader)
 			: Shader(shader) {}
 		ShaderComponent(const ShaderComponent&) = default;
+	};
+
+	struct MaterialComponent
+	{
+		std::vector<Banana::Material> Materials;
+		unsigned int UsedMaterialIndex = 0; // Useful if the entity you're rendering does not support material indices out of the box like models do
+
+		MaterialComponent(std::vector<Banana::Material> materials)
+			: Materials(materials) {}
+		MaterialComponent(const MaterialComponent&) = default;
 	};
 
 	// struct SkyboxComponent

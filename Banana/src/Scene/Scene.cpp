@@ -60,7 +60,30 @@ namespace Banana
 			auto vertexObjectView = m_Registry.view<TransformComponent, VertexObjectComponent>();
 			for (auto&& [entity, transform, vertexObject] : vertexObjectView.each())
 			{
-				Renderer::Get()->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO);
+				if (!vertexObject.Draw)
+					continue;
+
+				Entity ent(entity, this);
+				// If the entity has a material, draw it with the material
+				// If not, draw the entity with a beautiful magenta color so we know something is wrong
+				if (ent.HasComponent<MaterialComponent>())
+				{
+					auto& materialComp = ent.GetComponent<MaterialComponent>();
+					Renderer::Get()->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, materialComp.Materials[materialComp.UsedMaterialIndex], transform.GetTransfrom());
+				}
+				else
+				{
+					Material mat;
+					mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
+					Renderer::Get()->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, mat, transform.GetTransfrom());
+				}
+			}
+
+			auto modelView = m_Registry.view<TransformComponent, ModelComponent, MaterialComponent>();
+			for (auto&& [entity, transform, model, material] : modelView.each())
+			{
+				if (model.Draw)
+					Renderer::Get()->Draw(model.Model, material.Materials, transform.GetTransfrom());
 			}
 
 			Renderer::Get()->EndScene();
