@@ -1,4 +1,5 @@
 #pragma once
+#include <Core/Ref.h>
 #include <vector>
 
 namespace Banana
@@ -27,6 +28,9 @@ namespace Banana
 				m_DepthTexture = texture;
 		}
 
+		std::vector<FramebufferTexture> GetTextures() const { return m_Textures; }
+		FramebufferTexture GetDepthTexture() const { return m_DepthTexture; }
+
 		unsigned int Width = 0;
 		unsigned int Height = 0;
 		bool Resizable = true;
@@ -41,31 +45,27 @@ namespace Banana
 	class Framebuffer
 	{
 	public:
-		Framebuffer();
-		Framebuffer(const FramebufferSpecs& spec);
+		static Ref<Framebuffer> Create(const FramebufferSpecs& specs);
 
-		void Bind();
-		void Unbind();
+		virtual void Bind() = 0;
+		virtual void Unbind() = 0;
 
-		void SetSpecification(const FramebufferSpecs& spec) { m_Spec = spec; Recreate(); }
-		void Recreate();
-		void Resize(unsigned int width, unsigned int height);
+		virtual void SetSpecification(const FramebufferSpecs& spec) = 0;
+		virtual void Recreate() = 0;
+		virtual void Resize(unsigned int width, unsigned int height) = 0;
 
-		unsigned int RetrieveTexture(unsigned int id);
-		void BindTexture(unsigned int id, unsigned int slot = 0);
-		void BindAllTextures();
+		virtual void BindTexture(unsigned int id, unsigned int slot = 0) = 0;
+		virtual void BindAllTextures() = 0;
 
-		void ClearAttachmentTexture(unsigned int id, unsigned int value);
-		void ClearAllAttachmentTextures(unsigned int value);
+		virtual void ClearAttachmentTexture(unsigned int id, unsigned int value) = 0;
+		virtual void ClearAllAttachmentTextures(unsigned int value) = 0;
 
-		FramebufferSpecs GetSpec() const { return m_Spec; }
-		unsigned int GetID() const { return m_ID; }
+		FramebufferSpecs GetSpec() const { return m_Specs; }
+
+	protected:
+		FramebufferSpecs m_Specs;
 
 	private:
-		void FramebufferTextureFormatToGL(FramebufferTexture texture, unsigned int* format, unsigned int* type);
-
-		FramebufferSpecs m_Spec;
-
 		std::vector<unsigned int> m_ColorAttachments;
 		unsigned int m_DepthAttachment = -1;
 

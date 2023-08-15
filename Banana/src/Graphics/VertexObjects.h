@@ -1,5 +1,7 @@
 #pragma once
+#include <Core/Ref.h>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 #include <vector>
 
 namespace Banana
@@ -59,41 +61,25 @@ namespace Banana
 	class VAO
 	{
 	public:
-		VAO(const VertexLayout& layout, unsigned int numVertices);
-		~VAO();
+		static Ref<VAO> Create(const VertexLayout& layout, unsigned int numVertices);
 
-		template <typename T>
-		void SetData(unsigned int attributeIndex, std::vector<T> data)
-		{
-			Attribute attribute = m_Layout.GetAttributes()[attributeIndex];
-			glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-			unsigned int offset = 0;
-			for (unsigned int i = 0; i < attributeIndex; i++)
-				offset += m_Layout.GetAttributes()[i].Size;
-			glBufferSubData(GL_ARRAY_BUFFER, offset * m_NumVertices, data.size() * sizeof(T), &data[0]);
-		}
-		
-		template <typename T>
-		void SetDataInstance(unsigned int attributeIndex, std::vector<T> data)
-		{
-			Attribute attribute = m_Layout.GetAttributesInstance()[attributeIndex];
-			glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVBO);
-			glBufferSubData(GL_ARRAY_BUFFER, attribute.AttributeIndex * sizeof(T) * m_NumVertices, data.size() * sizeof(T), &data[0]);
-		}
+		virtual void SetData(unsigned int attributeIndex, std::vector<float> data) = 0;
+		virtual void SetData(unsigned int attributeIndex, std::vector<glm::vec2> data) = 0;
+		virtual void SetData(unsigned int attributeIndex, std::vector<glm::vec3> data) = 0;
+		virtual void SetData(unsigned int attributeIndex, std::vector<glm::vec4> data) = 0;
+		virtual void SetData(unsigned int attributeIndex, std::vector<glm::mat4> data) = 0;
 
-		void Bind();
+		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<float> data) = 0;
+		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<glm::vec2> data) = 0;
+		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<glm::vec3> data) = 0;
+		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<glm::vec4> data) = 0;
+		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<glm::mat4> data) = 0;
+
+		virtual void Bind() = 0;
 		
 		VertexLayout* GetLayout() { return &m_Layout; }
-		unsigned int GetID() const { return m_VAO; }
-		unsigned int GetVBO() const { return m_VBO; }
-		unsigned int GetInstanceVBO() const { return m_InstanceVBO; }
 
-	private:
-		unsigned int m_VAO = 0;
-		unsigned int m_VBO = 0;
-		unsigned int m_InstanceVBO = 0;
-
-		unsigned int m_AttributeIndex = 0;
+	protected:
 		unsigned int m_NumVertices;
 		VertexLayout m_Layout;
 	};
@@ -101,16 +87,14 @@ namespace Banana
 	class EBO
 	{
 	public:
-		EBO();
-		~EBO();
+		static Ref<EBO> Create();
 
-		void SetData(const std::vector<unsigned int>& indices);
-		unsigned int GetID() const { return m_ID; }
+		virtual void SetData(const std::vector<unsigned int>& indices) = 0;
+		virtual void Bind() = 0;
+
 		unsigned int GetCount() const { return m_Count; }
-		void Bind() const;
-
-	private:
-		unsigned int m_ID = 0;
+		
+	protected:
 		unsigned int m_Count = 0;
 	};
 }

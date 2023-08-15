@@ -40,8 +40,8 @@ namespace Banana
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 transform);
 		
-		void ProcessNodeMaterial(aiNode* node, const aiScene* scene, std::vector<Material>* materials);
-		Material ProcessMeshMaterial(aiMesh* mesh, const aiScene* scene);
+		void ProcessNodeMaterial(aiNode* node, const aiScene* scene, std::vector<Material>* materials, std::vector<std::string>* loadedMaterials);
+		void ProcessMeshMaterial(aiMesh* mesh, const aiScene* scene, std::vector<Material>* materials, std::vector<std::string>* loadedMaterials);
 
 	private:
 		std::vector<Mesh> m_Meshes;

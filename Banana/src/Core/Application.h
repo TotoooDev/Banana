@@ -1,7 +1,7 @@
 #pragma once
 #include <Core/Ref.h>
 #include <Graphics/Window.h>
-#include <Graphics/Renderer.h>
+#include <Graphics/RendererAPI.h>
 #include <Events/EventBus.h>
 #include <Events/Events.h>
 #include <Scene/Scene.h>
@@ -23,6 +23,7 @@ namespace Banana
 		void operator=(const Application&) = delete;
 	
 		static Application* Get() { return m_Instance; }
+		Ref<RendererAPI> GetRenderer() { return m_Renderer; }
 		EventBus* GetEventBus() { return &m_EventBus; }
 		ScenePool* GetScenePool() { return &m_ScenePool; }
 	
@@ -39,6 +40,8 @@ namespace Banana
 		static Application* m_Instance;
 
 		Window m_Window;
+		Ref<RendererAPI> m_Renderer;
+
 		Ref<Scene> m_CurrentScene = nullptr;
 		ScenePool m_ScenePool;
 

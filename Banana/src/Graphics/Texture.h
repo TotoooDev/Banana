@@ -1,4 +1,5 @@
 #pragma once
+#include <Core/Ref.h>
 #include <string>
 
 namespace Banana
@@ -27,32 +28,27 @@ namespace Banana
 
 	struct TextureSpecs
 	{
-		TextureWrapping WrappingMode;
-		TextureFiltering FilteringMode;
+		TextureWrapping WrappingMode = TextureWrapping::ClampToBorder;
+		TextureFiltering FilteringMode = TextureFiltering::Nearest;
 		// Only used if Width and Height are not -1
-		TextureChannels Channels;
+		TextureChannels Channels = TextureChannels::RGB;
 		// These are only used when creating an empty texture so that OpenGL knows what size the texture needs to be.
 		// Leave them to -1 or any negative number if you want to load a texture from a file.
-		int Width, Height;
-
-		TextureSpecs(TextureWrapping wrapping, TextureFiltering filtering, TextureChannels channels = TextureChannels::RGB, int width = -1, int height = -1)
-			: WrappingMode(wrapping), FilteringMode(filtering), Channels(channels), Width(width), Height(height) {}
+		int Width = -1, Height = -1;
 	};
 
 	// Wrapper for 2D textures
 	class Texture
 	{
 	public:
-		Texture(TextureSpecs specs);
-		~Texture();
+		static Ref<Texture> Create(const TextureSpecs& specs);
+		static Ref<Texture> Create(const TextureSpecs& specs, const std::string& path, bool flip = false);
 
-		void LoadFromFile(const std::string& path, bool flip = false);
+		virtual void LoadFromFile(const std::string& path, bool flip = false) = 0;
 
-		void Bind(unsigned int unit = 0);
+		virtual void Bind(unsigned int unit = 0) = 0;
 
-	private:
+	protected:
 		TextureSpecs m_Specs;
-
-		unsigned int m_ID;
 	};
 }

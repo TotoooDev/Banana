@@ -3,7 +3,6 @@
 #include <Scene/Scene.h>
 #include <Scene/Entity.h>
 #include <Scene/Components.h>
-#include <Graphics/Renderer.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -33,7 +32,7 @@ namespace Banana
 		m_Registry.destroy(entity.m_Identifier);
 	}
 
-	void Scene::UpdateScene(double timestep)
+	void Scene::UpdateScene(Ref<RendererAPI> renderer, double timestep)
 	{
 		// Execute scripts first
 		auto scriptView = m_Registry.view<ScriptableComponent>();
@@ -54,7 +53,18 @@ namespace Banana
 		auto camView = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto&& [camEntity, camTransform, camera] : camView.each())
 		{
-			Renderer::Get()->BeginScene(camera.Cam, camTransform.Translation);
+			renderer->BeginScene(camera.Cam, camTransform.Translation);
+
+			// Set lights
+			auto dirLightView = m_Registry.view<TransformComponent, DirectionalLightComponent>();
+			for (auto&& [entity, transform, light] : dirLightView.each())
+				renderer->AddDirectionalLight(light.Light, transform.Rotation);
+			auto pointLightView = m_Registry.view<TransformComponent, PointLightComponent>();
+			for (auto&& [entity, transform, light] : pointLightView.each())
+				renderer->AddPointLight(light.Light, transform.Translation);
+			auto spotLightView = m_Registry.view<TransformComponent, SpotLightComponent>();
+			for (auto&& [entity, transform, light] : spotLightView.each())
+				renderer->AddSpotLight(light.Light, transform.Translation, transform.Rotation);
 			
 			// Draw stuff
 			auto vertexObjectView = m_Registry.view<TransformComponent, VertexObjectComponent>();
@@ -69,13 +79,13 @@ namespace Banana
 				if (ent.HasComponent<MaterialComponent>())
 				{
 					auto& materialComp = ent.GetComponent<MaterialComponent>();
-					Renderer::Get()->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, materialComp.Materials[materialComp.UsedMaterialIndex], transform.GetTransfrom());
+					renderer->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, materialComp.Materials[materialComp.UsedMaterialIndex], transform.GetTransfrom());
 				}
 				else
 				{
 					Material mat;
 					mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
-					Renderer::Get()->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, mat, transform.GetTransfrom());
+					renderer->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, mat, transform.GetTransfrom());
 				}
 			}
 
@@ -83,10 +93,10 @@ namespace Banana
 			for (auto&& [entity, transform, model, material] : modelView.each())
 			{
 				if (model.Draw)
-					Renderer::Get()->Draw(model.Model, material.Materials, transform.GetTransfrom());
+					renderer->Draw(model.Model, material.Materials, transform.GetTransfrom());
 			}
 
-			Renderer::Get()->EndScene();
+			renderer->EndScene();
 		}
 
 		// ImGui

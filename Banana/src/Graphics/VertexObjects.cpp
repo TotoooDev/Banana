@@ -1,4 +1,7 @@
+#include <Core/Log.h>
 #include <Graphics/VertexObjects.h>
+#include <Graphics/RendererAPI.h>
+#include <Graphics/OpenGL/OpenGLVertexObjects.h>
 
 namespace Banana
 {
@@ -50,105 +53,35 @@ namespace Banana
 			m_AttributeIndex += 3;
 	}
 
-	VAO::VAO(const VertexLayout& layout, unsigned int numVertices)
-		: m_NumVertices(numVertices), m_Layout(layout)
+	Ref<VAO> VAO::Create(const VertexLayout& layout, unsigned int numVertices)
 	{
-		// Generate the array and the buffers
-		glGenVertexArrays(1, &m_VAO);
-		glGenBuffers(1, &m_VBO);
-		// No need to create an instance VBO if we don't use instancing
-		if (m_Layout.GetInstanceSize() > 0)
-			glGenBuffers(1, &m_InstanceVBO);
-
-		glBindVertexArray(m_VAO);
-
-		// Allocate memory on the GPU
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		glBufferData(GL_ARRAY_BUFFER, m_Layout.GetVertexSize() * m_NumVertices, nullptr, GL_STATIC_DRAW);
-
-		if (m_InstanceVBO != 0)
+		switch (RendererAPI::GetAPI())
 		{
-			// Here we assume there will be one instance of the data per vertex
-			glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVBO);
-			glBufferData(GL_ARRAY_BUFFER, m_Layout.GetInstanceSize() * m_NumVertices, nullptr, GL_STATIC_DRAW);
+		case RendererAPIName::OpenGL:
+			return CreateRef<OpenGLVAO>(layout, numVertices);
+		case RendererAPIName::Vulkan:
+			BANANA_ABORT("Vulkan is not supported yet :(");
+		case RendererAPIName::None:
+		default:
+			BANANA_ABORT("Unsupported renderer API {}!", (int)RendererAPI::GetAPI());
 		}
 
-		// Set the attributes layout
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		unsigned int offset = 0;
-		for (auto& attribute : m_Layout.GetAttributes())
+		return nullptr;
+	}
+
+	Ref<EBO> EBO::Create()
+	{
+		switch (RendererAPI::GetAPI())
 		{
-			glEnableVertexAttribArray(attribute.AttributeIndex);
-			glVertexAttribPointer(attribute.AttributeIndex, attribute.NumData, GL_FLOAT, GL_FALSE, 0, (void*)offset);
-			switch (attribute.DataType)
-			{
-			case Type::Float: offset += sizeof(float) * 1 * m_NumVertices; break;
-			case Type::Vec2: offset += sizeof(float) * 2 * m_NumVertices; break;
-			case Type::Vec3: offset += sizeof(float) * 3 * m_NumVertices; break;
-			case Type::Vec4: offset += sizeof(float) * 4 * m_NumVertices; break;
-			case Type::Mat4: offset += sizeof(float) * 16 * m_NumVertices; break;
-			}
+		case RendererAPIName::OpenGL:
+			return CreateRef<OpenGLEBO>();
+		case RendererAPIName::Vulkan:
+			BANANA_ABORT("Vulkan is not supported yet :(");
+		case RendererAPIName::None:
+		default:
+			BANANA_ABORT("Unsupported renderer API {}!", (int)RendererAPI::GetAPI());
 		}
 
-		if (m_InstanceVBO != 0)
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVBO);
-			offset = 0;
-			for (auto& attribute : m_Layout.GetAttributesInstance())
-			{
-				glEnableVertexAttribArray(attribute.AttributeIndex);
-				glVertexAttribPointer(attribute.AttributeIndex, attribute.NumData, GL_FLOAT, GL_FALSE, 0, (void*)offset);
-				switch (attribute.DataType)
-				{
-				case Type::Float: offset += sizeof(float) * 1 * m_NumVertices; break;
-				case Type::Vec2: offset += sizeof(float) * 2 * m_NumVertices; break;
-				case Type::Vec3: offset += sizeof(float) * 3 * m_NumVertices; break;
-				case Type::Vec4: offset += sizeof(float) * 4 * m_NumVertices; break;
-				case Type::Mat4: offset += sizeof(float) * 16 * m_NumVertices; break;
-				}
-				
-				// Set divisor
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-				glVertexAttribDivisor(attribute.AttributeIndex, 1);
-			}
-		}
-	}
-
-	VAO::~VAO()
-	{
-		glDeleteVertexArrays(1, &m_VAO);
-		glDeleteBuffers(1, &m_VBO);
-		if (m_InstanceVBO != 0)
-			glDeleteBuffers(1, &m_InstanceVBO);
-	}
-
-	void VAO::Bind()
-	{
-		glBindVertexArray(m_VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		if (m_InstanceVBO != 0)
-			glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVBO);
-	}
-
-	EBO::EBO()
-	{
-		glGenBuffers(1, &m_ID);
-	}
-
-	EBO::~EBO()
-	{
-		glDeleteBuffers(1, &m_ID);
-	}
-
-	void EBO::SetData(const std::vector<unsigned int>& indices)
-	{
-		m_Count = (unsigned int)indices.size();
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Count * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-	}
-
-	void EBO::Bind() const
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
+		return nullptr;
 	}
 }

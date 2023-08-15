@@ -7,7 +7,6 @@
 namespace Banana
 {
 	static bool WasGLFWInit = false;
-	static bool WasGLEWInit = false;
 
 	struct WindowSpecs
 	{
@@ -35,9 +34,6 @@ namespace Banana
 
 	private:
 		void SetCallbacks();
-		#ifdef BANANA_OPENGL_DEBUG
-			void InitOpenGLDebugOutput();
-		#endif
 
 	private:
 		GLFWwindow* m_Window = nullptr;

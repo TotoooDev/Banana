@@ -14,13 +14,13 @@ namespace Banana
 		if (!texCoords.empty())
 			layout.AddAttribute(Type::Vec2); // Texture coords
 
-		m_VAO = CreateRef<VAO>(layout, numVertices);
+		m_VAO = VAO::Create(layout, numVertices);
 		m_VAO->SetData(0, pos);
 		m_VAO->SetData(1, normal);
 		if (!texCoords.empty())
 			m_VAO->SetData(2, texCoords);
 
-		m_EBO = CreateRef<EBO>();
+		m_EBO = EBO::Create();
 		m_EBO->SetData(indices);
 	}
 
@@ -43,7 +43,7 @@ namespace Banana
 	{
 		BANANA_INFO("Loading materials of model {}", m_Path);
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(m_Path, aiProcess_EmbedTextures | (m_FlipTextures ? aiProcess_FlipUVs : 0));
+		const aiScene* scene = importer.ReadFile(m_Path, m_FlipTextures ? aiProcess_FlipUVs : 0);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			BANANA_ERROR("Failed to load {0}! Assimp error: {1}", m_Path, importer.GetErrorString());
@@ -51,7 +51,8 @@ namespace Banana
 		}
 
 		std::vector<Material> materials;
-		ProcessNodeMaterial(scene->mRootNode, scene, &materials);
+		std::vector<std::string> loadedMaterials;
+		ProcessNodeMaterial(scene->mRootNode, scene, &materials, &loadedMaterials);
 
 		return materials;
 	}
@@ -120,28 +121,34 @@ namespace Banana
 		return Mesh(mesh->mNumVertices, positions, normals, texCoords, indices, mesh->mMaterialIndex, transform);
 	}
 
-	void Model::ProcessNodeMaterial(aiNode* node, const aiScene* scene, std::vector<Material>* materials)
+	void Model::ProcessNodeMaterial(aiNode* node, const aiScene* scene, std::vector<Material>* materials, std::vector<std::string>* loadedMaterials)
 	{
-		// process all the node's meshes (if any)
+		// Process all the node's materials (if any)
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			materials->push_back(ProcessMeshMaterial(mesh, scene));
+			ProcessMeshMaterial(mesh, scene, materials, loadedMaterials);
 		}
-		// then do the same for each of its children
+		// Then do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
-			ProcessNodeMaterial(node->mChildren[i], scene, materials);
+			ProcessNodeMaterial(node->mChildren[i], scene, materials, loadedMaterials);
 		}
 	}
 
-	Material Model::ProcessMeshMaterial(aiMesh* mesh, const aiScene* scene)
+	void Model::ProcessMeshMaterial(aiMesh* mesh, const aiScene* scene, std::vector<Material>* materials, std::vector<std::string>* loadedMaterials)
 	{
+		aiMaterial* assimpMat = scene->mMaterials[mesh->mMaterialIndex];
+		for (auto& materialName : *loadedMaterials)
+		{
+			if (materialName == assimpMat->GetName().C_Str())
+				return;
+		}
+
 		// Process material
 		Material mat;
-		aiMaterial* assimpMat = scene->mMaterials[mesh->mMaterialIndex];
-		aiColor3D color;
 
+		aiColor3D color;
 		assimpMat->Get(AI_MATKEY_COLOR_AMBIENT, color);
 		mat.ColorAmbient = glm::vec3(color.r, color.g, color.b);
 		assimpMat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
@@ -149,8 +156,23 @@ namespace Banana
 		assimpMat->Get(AI_MATKEY_COLOR_SPECULAR, color);
 		mat.ColorSpecular = glm::vec3(color.r, color.g, color.b);
 
-		// TODO: Textures
+		// Textures
+		TextureSpecs specs(TextureWrapping::ClampToEdge, TextureFiltering::Linear);
+		aiString str;
+		assimpMat->GetTexture(aiTextureType_AMBIENT, mesh->mMaterialIndex, &str);
+		if (str.length > 0)
+			mat.TextureAmbient = Texture::Create(specs, str.C_Str());
+		assimpMat->GetTexture(aiTextureType_DIFFUSE, mesh->mMaterialIndex, &str);
+		if (str.length > 0)
+			mat.TextureDiffuse = Texture::Create(specs, str.C_Str());
+		assimpMat->GetTexture(aiTextureType_SPECULAR, mesh->mMaterialIndex, &str);
+		if (str.length > 0)
+			mat.TextureSpecular = Texture::Create(specs, str.C_Str());
 
-		return mat;
+		if (!mat.TextureDiffuse)
+			mat.UseColors = true;
+
+		loadedMaterials->push_back(assimpMat->GetName().C_Str());
+		materials->push_back(mat);
 	}
 }

@@ -1,4 +1,5 @@
 #include <Core/Application.h>
+#include <Core/Config.h>
 #include <Core/Log.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -31,6 +32,15 @@ namespace Banana
 		// Sub to the window events
 		m_EventBus.Subscribe(this, &Application::OnWindowClosedEvent);
 		m_EventBus.Subscribe(this, &Application::OnWindowResizedEvent);
+
+		// Create the renderer
+		RendererAPIName api;
+		#if defined(BANANA_OPENGL)
+			api = RendererAPIName::OpenGL;
+		#elif defined(BANANA_VULKAN)
+			api = RendererAPIName::Vulkan;
+		#endif
+		m_Renderer = RendererAPI::Create(api);
 	}
 
 	void Application::Run()
@@ -38,9 +48,9 @@ namespace Banana
 		// I mean it can't get simpler than that
 		while (m_IsRunning)
 		{
-			Renderer::Get()->Clear();
+			m_Renderer->Clear();
 			if (m_CurrentScene)
-				m_CurrentScene->UpdateScene(m_Timestep);
+				m_CurrentScene->UpdateScene(m_Renderer, m_Timestep);
 			m_Window.Update();
 			UpdateTimestep();
 		}
@@ -68,6 +78,6 @@ namespace Banana
 
 	void Application::OnWindowResizedEvent(WindowResizedEvent* event)
 	{
-		Renderer::Get()->OnViewportResize(event->Width, event->Height);
+		m_Renderer->SetViewport(0, 0, event->Width, event->Height);
 	}
 }

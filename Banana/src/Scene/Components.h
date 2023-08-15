@@ -4,9 +4,8 @@
 #include <Graphics/Shader.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Material.h>
- #include <Graphics/Mesh.h>
-// #include <Graphics/Light.h>
-// #include <Graphics/Cubemap.h>
+#include <Graphics/Mesh.h>
+#include <Graphics/Light.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <functional>
@@ -37,36 +36,36 @@ namespace Banana
 	};
 
 	// Graphics
-	// struct DirectionalLightComponent
-	// {
-	// 	DirectionalLight Light;
-	// 	bool Emit = true;
-	// 
-	// 	DirectionalLightComponent() {}
-	// 	DirectionalLightComponent(DirectionalLight light)
-	// 		: Light(light) {}
-	// 	DirectionalLightComponent(const DirectionalLightComponent&) = default;
-	// };
-	// struct PointLightComponent
-	// {
-	// 	PointLight Light;
-	// 	bool Emit = true;
-	// 
-	// 	PointLightComponent() {}
-	// 	PointLightComponent(PointLight light)
-	// 		: Light(light) {}
-	// 	PointLightComponent(const PointLightComponent&) = default;
-	// };
-	// struct SpotLightComponent
-	// {
-	// 	SpotLight Light;
-	// 	bool Emit = true;
-	// 
-	// 	SpotLightComponent() {}
-	// 	SpotLightComponent(SpotLight light)
-	// 		: Light(light) {}
-	// 	SpotLightComponent(const SpotLightComponent&) = default;
-	// };
+	struct DirectionalLightComponent
+	{
+		DirectionalLight Light;
+		bool Emit = true;
+	
+		DirectionalLightComponent() {}
+		DirectionalLightComponent(DirectionalLight light)
+			: Light(light) {}
+		DirectionalLightComponent(const DirectionalLightComponent&) = default;
+	};
+	struct PointLightComponent
+	{
+		PointLight Light;
+		bool Emit = true;
+	
+		PointLightComponent() {}
+		PointLightComponent(PointLight light)
+			: Light(light) {}
+		PointLightComponent(const PointLightComponent&) = default;
+	};
+	struct SpotLightComponent
+	{
+		SpotLight Light;
+		bool Emit = true;
+	
+		SpotLightComponent() {}
+		SpotLightComponent(SpotLight light)
+			: Light(light) {}
+		SpotLightComponent(const SpotLightComponent&) = default;
+	};
 
 	struct ModelComponent
 	{
@@ -91,9 +90,9 @@ namespace Banana
 
 	struct ShaderComponent
 	{
-		Banana::Shader Shader;
+		Ref<Banana::Shader> Shader;
 
-		ShaderComponent(Banana::Shader shader)
+		ShaderComponent(Ref<Banana::Shader> shader)
 			: Shader(shader) {}
 		ShaderComponent(const ShaderComponent&) = default;
 	};
@@ -143,7 +142,11 @@ namespace Banana
 
 	struct ImGuiComponent
 	{
-		bool Draw = false;
+		#ifdef BANANA_DEBUG
+			bool Draw = true;
+		#else
+			bool Draw = false;
+		#endif
 		std::function<void(Entity, bool*, double)> OnDraw;
 
 		ImGuiComponent() {}
