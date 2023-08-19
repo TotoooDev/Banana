@@ -1,17 +1,20 @@
-# Banana
+# Banana 🍌
 
-en gros banana c'est le moteur et il faut le jeu qui définit les acteurs et leurs comportements en jeu.
+Banana is a 3D game engine written with C++ and OpenGL.
 
-## Project structure
+## How to create a game with Banana
 
-This project contains two separate premake projects: Banana (the engine) and [insert game name here] (the game).
+### No editor?
 
-Banana is built to a library that needs to be linked to your game.
+The first thing to know about Banana is that there is no editor like with engine such as Unity, Unreal or Godot. Everything has to be implemented in the code of your game. To help you with this, Banana comes with the spectacular [Dear ImGui](https://github.com/ocornut/imgui) library.
 
-In the game project you will define all the actor's behavior and how Banana should handle them.
+The reason why there is no editor (and probably will never be) is that I didn't want to lose time creating a cute UI for no one to use it (I mean who would use Banana when you can just download Godot).
 
-## Scenes
+### Build Banana
 
-After you created all the actors you needed, you need to create a scene that includes the actors you created before.
+Banana uses [Premake](https://premake.github.io/) as its configuration builder. At this point in time I was too lazy to add Linux support so good luck with that penguin users.
 
-You can switch scenes whenever you like.
+1. First, download the source code.
+2. Then, depending on you OS, run the `GenerateProjects` script (the `.bat` one on Windows or the `.sh` one on Linux). This will either create a Visual Studio solution file or a Makefile depending on you OS.
+3. Open the solution (or the whole folder if you don't use Windows). Your game will live in the `GameProject` folder.
+4. Congratulations, you are now ready to create the most awesome game ever made!
