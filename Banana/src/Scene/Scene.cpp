@@ -49,6 +49,20 @@ namespace Banana
 				script.OnUpdate(ent, timestep);
 		}
 
+		// Update physics
+		if (m_PhysicsWorld)
+			m_PhysicsWorld->Step((float)timestep);
+		auto physicsView = m_Registry.view<TransformComponent, RigidBodyComponent>();
+		for (auto&& [entity, transform, physics] : physicsView.each())
+		{
+			transform.Translation = physics.RigidBody->GetTransform()->Position;
+		}
+		auto objectsView = m_Registry.view<TransformComponent, PhysicsObjectComponent>();
+		for (auto&& [entity, transform, physics] : objectsView.each())
+		{
+			transform.Translation = physics.Object->GetTransform()->Position;
+		}
+
 		// Rendering
 		auto camView = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto&& [camEntity, camTransform, camera] : camView.each())

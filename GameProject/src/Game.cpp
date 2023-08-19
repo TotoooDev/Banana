@@ -1,5 +1,5 @@
 #include <Core/Entrypoint.h>
-#include <Scene.h>
+#include <ExampleScene.h>
 
 Application* CreateApplication()
 {

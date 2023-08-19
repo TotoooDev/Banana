@@ -6,6 +6,7 @@
 #include <Graphics/Material.h>
 #include <Graphics/Mesh.h>
 #include <Graphics/Light.h>
+#include <Physics/RigidBody.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <functional>
@@ -125,6 +126,26 @@ namespace Banana
 		CameraComponent(Ref<Camera> cam, bool primary = false)
 			: Cam(cam), Primary(primary) {}
 		CameraComponent(const CameraComponent&) = default;
+	};
+
+	// Physics
+	// Temprary, this is for testing purposes
+	struct RigidBodyComponent
+	{
+		Ref<Physics::RigidBody> RigidBody;
+
+		RigidBodyComponent(Ref<Physics::RigidBody> body)
+			: RigidBody(body) {}
+		RigidBodyComponent(const RigidBodyComponent&) = default;
+	};
+
+	struct PhysicsObjectComponent
+	{
+		Ref<Physics::Object> Object;
+
+		PhysicsObjectComponent(Ref<Physics::Object> object)
+			: Object(object) {}
+		PhysicsObjectComponent(const PhysicsObjectComponent&) = default;
 	};
 
 	// Scripts
