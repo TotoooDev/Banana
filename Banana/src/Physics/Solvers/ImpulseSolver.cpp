@@ -20,7 +20,7 @@ namespace Banana::Physics
 			float bInverseMass = b ? 1.0f / b->GetMass() : 0.0f;
 
 			// Impulse
-			float e = (a ? a->GetRestitution() : 1.0f) * (b ? b->GetRestitution() : 1.0f);
+			float e = (a ? a->GetRestitution() : 0.5f) * (b ? b->GetRestitution() : 0.5f);
 			float j = -(1.0f + e) * nSpd / (aInverseMass + bInverseMass);
 
 			glm::vec3 impulse = j * collision.Points.Normal;

@@ -6,6 +6,7 @@
 #include <Physics/Colliders/SphereCollider.h>
 #include <Physics/Solvers/PositionSolver.h>
 #include <Physics/Solvers/ImpulseSolver.h>
+#include <Graphics/Primitives/Icosphere.h>
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -23,7 +24,7 @@ public:
 		rigidBody2->SetPosition(glm::vec3(10.0f, 0.0f, 0.0f));
 		rigidBody2->SetVelocity(glm::vec3(-10.0f, 0.0f, 0.0f));
 		Ref<Physics::Object> rigidBody3 = CreateRef<Physics::Object>(new Physics::Transform, new Physics::SphereCollider(10.0f), false);
-		rigidBody3->SetPosition(glm::vec3(0.0f, -30.0f, 0.0f));
+		rigidBody3->SetPosition(glm::vec3(-5.0f, -20.0f, 0.0f));
 
 		m_PhysicsWorld = CreateRef<Physics::DynamicsWorld>();
 		m_PhysicsWorld->AddRigidBody(rigidBody1);
@@ -41,16 +42,6 @@ public:
 		m_Model1.AddComponent<ModelComponent>(peachModel);
 		m_Model1.AddComponent<MaterialComponent>(peachMaterials);
 		m_Model1.AddComponent<RigidBodyComponent>(rigidBody1);
-		auto& modelImGui = m_Model1.AddComponent<ImGuiComponent>();
-		modelImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
-		{
-			auto& transform = ent.GetComponent<TransformComponent>();
-			ImGui::Begin("Model");
-			ImGui::DragFloat3("Position", glm::value_ptr(transform.Translation), 0.1f);
-			ImGui::DragFloat3("Rotation", glm::value_ptr(transform.Rotation), 0.1f);
-			ImGui::DragFloat3("Scale", glm::value_ptr(transform.Scale), 0.1f);
-			ImGui::End();
-		};
 
 		m_Model2 = CreateEntity();
 		m_Model2.AddComponent<TransformComponent>();
@@ -59,10 +50,18 @@ public:
 		m_Model2.AddComponent<RigidBodyComponent>(rigidBody2);
 
 		m_Model3 = CreateEntity();
-		m_Model3.AddComponent<TransformComponent>();
-		m_Model3.AddComponent<ModelComponent>(peachModel);
-		m_Model3.AddComponent<MaterialComponent>(peachMaterials);
+		auto& model3Transform = m_Model3.AddComponent<TransformComponent>();
+		model3Transform.Translation = glm::vec3(-5.0f, -20.0f, 0.0f);
+		model3Transform.Scale = glm::vec3(10.0f);
+		m_Model3.AddComponent<MeshComponent>(CreateRef<Icosphere>(2));
 		m_Model3.AddComponent<PhysicsObjectComponent>(rigidBody3);
+		m_Model3.AddComponent<PointLightComponent>();
+		Material mat;
+		mat.ColorDiffuse = glm::vec3(1.0f);
+		mat.UseColors = true;
+		mat.DrawWireframe = true;
+		std::vector<Material> materials = { mat };
+		m_Model3.AddComponent<MaterialComponent>(materials);
 
 		m_Camera = CreateEntity();
 		auto& camTransform = m_Camera.AddComponent<TransformComponent>();
@@ -90,14 +89,6 @@ public:
 		auto& lightTransform = m_Light.AddComponent<TransformComponent>();
 		lightTransform.Rotation = glm::vec3(0.0f, -1.0f, 0.0f);
 		m_Light.AddComponent<DirectionalLightComponent>();
-		auto& lightImGui = m_Light.AddComponent<ImGuiComponent>();
-		lightImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
-		{
-			auto& transform = ent.GetComponent<TransformComponent>();
-			ImGui::Begin("Directional Light");
-			ImGui::DragFloat3("Direction", glm::value_ptr(transform.Rotation), 0.01f);
-			ImGui::End();
-		};
 
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResied);
 	}

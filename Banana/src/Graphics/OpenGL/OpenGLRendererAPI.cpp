@@ -54,15 +54,15 @@ namespace Banana
 		m_CurrentShader = nullptr;
 	}
 
-	void OpenGLRendererAPI::Draw(Mesh mesh, Material material, glm::mat4 transform)
+	void OpenGLRendererAPI::Draw(Ref<Mesh> mesh, Material material, glm::mat4 transform)
 	{
-		Draw(mesh.GetVAO(), mesh.GetEBO(), material, transform);
+		Draw(mesh->GetVAO(), mesh->GetEBO(), material, transform);
 	}
 
 	void OpenGLRendererAPI::Draw(Ref<Model> model, std::vector<Material> materials, glm::mat4 transform)
 	{
 		for (auto& mesh : model->GetMeshes())
-			Draw(mesh, materials[mesh.GetMaterialIndex()], transform);
+			Draw(mesh, materials[mesh->GetMaterialIndex()], transform);
 	}
 
 	void OpenGLRendererAPI::DrawTextured(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)
@@ -74,6 +74,11 @@ namespace Banana
 	{
 		if (m_Target)
 			m_Target->Bind();
+
+		if (material.DrawWireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		m_CurrentShader->Bind();
 		m_CurrentShader->SetMat4(transform, "uModel");

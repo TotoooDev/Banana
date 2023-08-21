@@ -4,7 +4,7 @@
 #include <Graphics/Shader.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Material.h>
-#include <Graphics/Mesh.h>
+#include <Graphics/Model.h>
 #include <Graphics/Light.h>
 #include <Physics/RigidBody.h>
 #include <glm/glm.hpp>
@@ -68,6 +68,15 @@ namespace Banana
 		SpotLightComponent(const SpotLightComponent&) = default;
 	};
 
+	struct MeshComponent
+	{
+		Ref<Banana::Mesh> Mesh;
+		bool Draw = true;
+
+		MeshComponent(Ref<Banana::Mesh> mesh)
+			: Mesh(mesh) {}
+		MeshComponent(const MeshComponent&) = default;
+	};
 	struct ModelComponent
 	{
 		Ref<Banana::Model> Model;

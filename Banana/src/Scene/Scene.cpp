@@ -102,6 +102,28 @@ namespace Banana
 					renderer->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, mat, transform.GetTransfrom());
 				}
 			}
+			auto meshView = m_Registry.view<TransformComponent, MeshComponent>();
+			for (auto&& [entity, transform, mesh] : meshView.each())
+			{
+				if (!mesh.Draw)
+					continue;
+
+				Entity ent(entity, this);
+				// If the entity has a material, draw it with the material
+				// If not, draw the entity with a beautiful magenta color so we know something is wrong
+				if (ent.HasComponent<MaterialComponent>())
+				{
+					auto& materialComp = ent.GetComponent<MaterialComponent>();
+					renderer->Draw(mesh.Mesh, materialComp.Materials[materialComp.UsedMaterialIndex], transform.GetTransfrom());
+				}
+				else
+				{
+					Material mat;
+					mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
+					mat.UseColors = true;
+					renderer->Draw(mesh.Mesh, mat, transform.GetTransfrom());
+				}
+			}
 
 			auto modelView = m_Registry.view<TransformComponent, ModelComponent, MaterialComponent>();
 			for (auto&& [entity, transform, model, material] : modelView.each())

@@ -7,7 +7,8 @@ namespace Banana
 {
 	struct Material
 	{
-		bool UseColors = 0;
+		bool UseColors = false;
+		bool DrawWireframe = false;
 
 		glm::vec3 ColorAmbient = glm::vec3(0.0f);
 		glm::vec3 ColorDiffuse = glm::vec3(0.0f);

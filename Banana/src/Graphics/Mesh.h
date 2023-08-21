@@ -3,8 +3,6 @@
 #include <Graphics/VertexObjects.h>
 #include <Graphics/Material.h>
 #include <glm/glm.hpp>
-#include <assimp/scene.h>
-#include <vector>
 
 namespace Banana
 {
@@ -18,34 +16,13 @@ namespace Banana
 		glm::mat4 GetTransform() const { return m_Transform; }
 		unsigned int GetMaterialIndex() const { return m_MaterialIndex; }
 
-	private:
+	protected:
+		Mesh() : m_VAO(nullptr), m_EBO(nullptr), m_Transform(glm::mat4(1.0f)), m_MaterialIndex(0) {}
+
+	protected:
 		Ref<VAO> m_VAO;
 		Ref<EBO> m_EBO;
 		glm::mat4 m_Transform;
 		unsigned int m_MaterialIndex;
-	};
-
-	// The model geometry is loaded separatly from its materials.
-	// To get the materials, you can call the LoadMaterials method
-	class Model
-	{
-	public:
-		Model(const std::string& path, bool flipTextures = false);
-
-		std::vector<Material> LoadMaterials();
-		std::vector<Mesh> GetMeshes() const { return m_Meshes; }
-		std::string GetPath() const { return m_Path; }
-
-	private:
-		void ProcessNode(aiNode* node, const aiScene* scene);
-		Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene, glm::mat4 transform);
-		
-		void ProcessNodeMaterial(aiNode* node, const aiScene* scene, std::vector<Material>* materials, std::vector<std::string>* loadedMaterials);
-		void ProcessMeshMaterial(aiMesh* mesh, const aiScene* scene, std::vector<Material>* materials, std::vector<std::string>* loadedMaterials);
-
-	private:
-		std::vector<Mesh> m_Meshes;
-		std::string m_Path;
-		bool m_FlipTextures;
 	};
 }

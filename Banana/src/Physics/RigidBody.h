@@ -34,9 +34,9 @@ namespace Banana::Physics
 		glm::vec3 m_Force = glm::vec3(0.0f);
 		glm::vec3 m_Velocity = glm::vec3(0.0f);
 
-		float m_StaticFriction = 1.0f;
-		float m_DynamicFriction = 1.0f;
-		float m_Restitution = 1.0f;
+		float m_StaticFriction = 0.2f;
+		float m_DynamicFriction = 0.2f;
+		float m_Restitution = 0.5f;
 
 		float m_Mass;
 		bool m_TakesGravity;
