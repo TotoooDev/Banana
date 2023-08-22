@@ -4,6 +4,7 @@
 
 namespace Banana
 {
+	// From https://schneide.blog/2016/07/15/generating-an-icosphere-in-c/
 	class Icosphere : public Mesh
 	{
 	public:

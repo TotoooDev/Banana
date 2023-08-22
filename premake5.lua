@@ -59,7 +59,8 @@ project "Banana"
 			"opengl32",
 			"glew32",
 			"glfw3dll",
-			"assimp-vc143-mt"
+			"assimp-vc143-mt",
+			"reactphysics3d"
 		}
 
 	-- If the project is generated on Linux it will apply these rules
