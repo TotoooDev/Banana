@@ -24,6 +24,10 @@ namespace Banana
 		Collider AddCapsuleCollider(float radius, float height, glm::vec3 relativePos = glm::vec3(0.0f), glm::vec3 relativeRotation = glm::vec3(0.0f));
 		void SetMass(float mass);
 		void SetTakesGravity(bool takesGravity);
+		void SetVelocity(glm::vec3 velocity);
+		void SetAngularVelocity(glm::vec3 velocity);
+
+		void ApplyForce(glm::vec3 force);
 
 		glm::mat4 GetInterpolatedTransform() { return m_InterpolatedTransform; }
 		glm::mat4 GetTransform();

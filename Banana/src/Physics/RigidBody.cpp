@@ -53,6 +53,21 @@ namespace Banana
 		m_RigidBody->enableGravity(takesGravity);
 	}
 
+	void RigidBody::SetVelocity(glm::vec3 velocity)
+	{
+		m_RigidBody->setLinearVelocity(RP3DVec3(velocity));
+	}
+
+	void RigidBody::SetAngularVelocity(glm::vec3 velocity)
+	{
+		m_RigidBody->setAngularVelocity(RP3DVec3(velocity));
+	}
+
+	void RigidBody::ApplyForce(glm::vec3 force)
+	{
+		m_RigidBody->applyLocalForceAtCenterOfMass(RP3DVec3(force));
+	}
+
 	glm::mat4 RigidBody::GetTransform()
 	{
 		return GLMTransform(m_RigidBody->getTransform());

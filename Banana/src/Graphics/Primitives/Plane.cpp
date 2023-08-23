@@ -21,7 +21,7 @@ namespace Banana
 		float uStep = 1.0f / resX;
 		float vStep = 1.0f / resZ;
 
-		glm::vec3 offset(-1.0f, 0.0f, 1.0f);
+		glm::vec3 offset(-1.0f, 0.0f, -1.0f);
 
 		for (unsigned int x = 0; x <= resX; x++)
 		{

@@ -13,42 +13,39 @@ class ExampleScene : public Scene
 public:
 	ExampleScene()
 	{
-		Application::Get()->GetRenderer ()->SetProjection(45.0f, 1280.0f / 720.0f, 0.1f, 1000.0f);
+		Application::Get()->GetRenderer()->SetProjection(45.0f, 1280.0f / 720.0f, 0.1f, 1000.0f);
 
 		m_PhysicsWorld = CreateRef<PhysicsWorld>();
+		RigidBody sphereRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Dynamic);
+		RigidBody planeRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Static, glm::vec3(0.0f, -5.0f, 0.0f));
+		sphereRigidBody.AddSphereCollider(1.0f);
+		sphereRigidBody.ApplyForce(glm::vec3(-100.0f, 200.0f, 100.0f));
+		planeRigidBody.AddBoxCollider(glm::vec3(10.0f, 0.0f, 10.0f));
 
 		Ref<Model> peachModel = CreateRef<Model>("Peach.fbx");
 		Ref<Model> bananaModel = CreateRef<Model>("Banana.fbx");
 		std::vector<Material> peachMaterials = peachModel->LoadMaterials();
 		std::vector<Material> bananaMaterials = bananaModel->LoadMaterials();
 
-		RigidBody sphereRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Dynamic);
-		RigidBody planeRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Static, glm::vec3(0.0f, -5.0f, 0.0f));
-		sphereRigidBody.AddSphereCollider(1.0f);
-		planeRigidBody.AddBoxCollider(glm::vec3(10.0f, 0.0f, 10.0f));
-
 		m_Model = CreateEntity();
 		m_Model.AddComponent<TransformComponent>();
 		m_Model.AddComponent<ModelComponent>(peachModel);
 		m_Model.AddComponent<MaterialComponent>(peachMaterials);
 		m_Model.AddComponent<PhysicsComponent>(sphereRigidBody);
+		auto& modelScript = m_Model.AddComponent<ScriptableComponent>();
+		modelScript.OnUpdate = [&](Entity ent, double timestep)
+		{
+			auto& physics = ent.GetComponent<PhysicsComponent>();
+			if (m_KeysDown.Z)
+				physics.RigidBody.SetVelocity(glm::vec3(0.0f, 10.0f, 0.0f));
+		};
 
 		m_Plane = CreateEntity();
 		auto& planeTransform = m_Plane.AddComponent<TransformComponent>();
 		planeTransform.Translation = glm::vec3(0.0f, -5.0f, 0.0f);
-		// planeTransform.Scale = glm::vec3(20.0f, 1.0f, 20.0f);
-		m_Plane.AddComponent<MeshComponent>(CreateRef<Plane>(5, 5));
+		planeTransform.Scale = glm::vec3(20.0f, 1.0f, 20.0f);
+		m_Plane.AddComponent<MeshComponent>(CreateRef<Plane>(1, 1));
 		m_Plane.AddComponent<PhysicsComponent>(planeRigidBody);
-		auto& planeImGui = m_Plane.AddComponent<ImGuiComponent>();
-		planeImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
-		{
-			auto& transform = ent.GetComponent<TransformComponent>();
-		
-			ImGui::Begin("Plane");
-			ImGui::DragFloat3("Position", glm::value_ptr(transform.Translation), 0.1f);
-			ImGui::DragFloat3("Scale", glm::value_ptr(transform.Scale), 0.1f);
-			ImGui::End();
-		};
 
 		m_Camera = CreateEntity();
 		auto& camTransform = m_Camera.AddComponent<TransformComponent>();
@@ -77,23 +74,25 @@ public:
 		lightTransform.Rotation = glm::vec3(0.0f, -1.0f, 0.0f);
 		m_Light.AddComponent<DirectionalLightComponent>();
 
-		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResied);
-	}
-
-	virtual void OnSetAsCurrent() override
-	{
-		BANANA_INFO("Scene1 set as current");
-	}
-
-	virtual void OnReplaced() override
-	{
-		BANANA_INFO("Scene1 gets replaced");
+		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResized);
+		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnKeyDown);
+		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnKeyUp);
 	}
 
 private:
-	void OnWindowResied(WindowResizedEvent* event)
+	void OnWindowResized(WindowResizedEvent* event)
 	{
 		Application::Get()->GetRenderer()->SetProjection(45.0f, (float)event->Width / (float)event->Height, 0.1f, 1000.0f);
+	}
+	void OnKeyDown(KeyDownEvent* event)
+	{
+		if (event->Keycode == BANANA_KEY_Z)
+			m_KeysDown.Z = true;
+	}
+	void OnKeyUp(KeyUpEvent* event)
+	{
+		if (event->Keycode == BANANA_KEY_Z)
+			m_KeysDown.Z = false;
 	}
 
 private:
@@ -101,4 +100,9 @@ private:
 	Entity m_Plane;
 	Entity m_Camera;
 	Entity m_Light;
+
+	struct KeysDown
+	{
+		bool Z = false;
+	} m_KeysDown;
 };
