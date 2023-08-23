@@ -50,7 +50,8 @@ project "Banana"
 
 	-- If the project is generated on Windows it will apply these rules
 	filter "system:windows"
-		staticruntime "On"
+		staticruntime "off"
+		runtime "Release"
 		systemversion "latest"
 		libdirs ("libs/windows")
 		-- Libraries to link
@@ -65,7 +66,7 @@ project "Banana"
 
 	-- If the project is generated on Linux it will apply these rules
 	filter "system:linux"
-		staticruntime "On"
+		staticruntime "off"
 		systemversion "latest"
 		libdirs ("libs/linux")
 
@@ -113,7 +114,8 @@ project "GameProject"
 	links ("Banana")
 	
 	filter "system:windows"
-		staticruntime "On"
+		staticruntime "off"
+		runtime "Release"
 		systemversion "latest"
 		libdirs ("libs/windows")
 		-- links ()
@@ -121,7 +123,7 @@ project "GameProject"
 		postbuildcommands ("xcopy ..\\dev-assets\\ ..\\bin\\" .. outputDir .. "\\%{prj.name}\\ /s /e /y /i")
 
 	filter "system:linux"
-		staticruntime "On"
+		staticruntime "off"
 		systemversion "latest"
 		libdirs ("libs/linux")
 

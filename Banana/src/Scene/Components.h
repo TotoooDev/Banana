@@ -1,6 +1,7 @@
 #pragma once
 #include <Core/Ref.h>
 #include <Scene/Entity.h>
+#include <Physics/RigidBody.h>
 #include <Graphics/Shader.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Material.h>
@@ -33,6 +34,16 @@ namespace Banana
 				rotation *
 				glm::scale(glm::mat4(1.0f), Scale);
 		}
+	};
+
+	// Physics
+	struct PhysicsComponent
+	{
+		Banana::RigidBody RigidBody;
+
+		PhysicsComponent(Banana::RigidBody body)
+			: RigidBody(body) {}
+		PhysicsComponent(const PhysicsComponent&) = default;
 	};
 
 	// Graphics

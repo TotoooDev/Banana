@@ -34,7 +34,14 @@ namespace Banana
 
 	void Scene::UpdateScene(Ref<RendererAPI> renderer, double timestep)
 	{
-		// Execute scripts first
+		ScriptComponents(timestep);
+		Physics(timestep);
+		Rendering(renderer);
+		ImGui(timestep);
+	}
+
+	void Scene::ScriptComponents(double timestep)
+	{
 		auto scriptView = m_Registry.view<ScriptableComponent>();
 		for (auto&& [entity, script] : scriptView.each())
 		{
@@ -48,80 +55,118 @@ namespace Banana
 			if (script.OnUpdate)
 				script.OnUpdate(ent, timestep);
 		}
+	}
 
-		// Rendering
+	void Scene::Physics(double timestep)
+	{
+		if (!m_PhysicsWorld)
+			return;
+			
+		m_PhysicsWorld->Step((float)timestep);
+
+		// Interpolate rigid bodies transform
+		float interpolationFactor = m_PhysicsWorld->GetAccumulator() / m_PhysicsWorld->GetTimestep();
+		auto physicsView = m_Registry.view<TransformComponent, PhysicsComponent>();
+		for (auto&& [entity, transform, physics] : physicsView.each())
+		{
+			transform.Translation = physics.RigidBody.GetPosition();
+			transform.Rotation = physics.RigidBody.GetRotation();
+		}
+	}
+
+	void Scene::Rendering(Ref<RendererAPI> renderer)
+	{
 		auto camView = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto&& [camEntity, camTransform, camera] : camView.each())
 		{
 			renderer->BeginScene(camera.Cam, camTransform.Translation);
 
-			// Set lights
-			auto dirLightView = m_Registry.view<TransformComponent, DirectionalLightComponent>();
-			for (auto&& [entity, transform, light] : dirLightView.each())
-				renderer->AddDirectionalLight(light.Light, transform.Rotation);
-			auto pointLightView = m_Registry.view<TransformComponent, PointLightComponent>();
-			for (auto&& [entity, transform, light] : pointLightView.each())
-				renderer->AddPointLight(light.Light, transform.Translation);
-			auto spotLightView = m_Registry.view<TransformComponent, SpotLightComponent>();
-			for (auto&& [entity, transform, light] : spotLightView.each())
-				renderer->AddSpotLight(light.Light, transform.Translation, transform.Rotation);
-			
-			// Draw stuff
-			auto vertexObjectView = m_Registry.view<TransformComponent, VertexObjectComponent>();
-			for (auto&& [entity, transform, vertexObject] : vertexObjectView.each())
-			{
-				if (!vertexObject.Draw)
-					continue;
+			SetLights(renderer);
 
-				Entity ent(entity, this);
-				// If the entity has a material, draw it with the material
-				// If not, draw the entity with a beautiful magenta color so we know something is wrong
-				if (ent.HasComponent<MaterialComponent>())
-				{
-					auto& materialComp = ent.GetComponent<MaterialComponent>();
-					renderer->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, materialComp.Materials[materialComp.UsedMaterialIndex], transform.GetTransfrom());
-				}
-				else
-				{
-					Material mat;
-					mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
-					renderer->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, mat, transform.GetTransfrom());
-				}
-			}
-			auto meshView = m_Registry.view<TransformComponent, MeshComponent>();
-			for (auto&& [entity, transform, mesh] : meshView.each())
-			{
-				if (!mesh.Draw)
-					continue;
-
-				Entity ent(entity, this);
-				// If the entity has a material, draw it with the material
-				// If not, draw the entity with a beautiful magenta color so we know something is wrong
-				if (ent.HasComponent<MaterialComponent>())
-				{
-					auto& materialComp = ent.GetComponent<MaterialComponent>();
-					renderer->Draw(mesh.Mesh, materialComp.Materials[materialComp.UsedMaterialIndex], transform.GetTransfrom());
-				}
-				else
-				{
-					Material mat;
-					mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
-					mat.UseColors = true;
-					renderer->Draw(mesh.Mesh, mat, transform.GetTransfrom());
-				}
-			}
-
-			auto modelView = m_Registry.view<TransformComponent, ModelComponent, MaterialComponent>();
-			for (auto&& [entity, transform, model, material] : modelView.each())
-			{
-				if (model.Draw)
-					renderer->Draw(model.Model, material.Materials, transform.GetTransfrom());
-			}
+			DrawVAOs(renderer);
+			DrawMeshes(renderer);
+			DrawModels(renderer);
 
 			renderer->EndScene();
 		}
+	}
 
-		// ImGui
+	void Scene::SetLights(Ref<RendererAPI> renderer)
+	{
+		auto dirLightView = m_Registry.view<TransformComponent, DirectionalLightComponent>();
+		for (auto&& [entity, transform, light] : dirLightView.each())
+			renderer->AddDirectionalLight(light.Light, transform.Rotation);
+		auto pointLightView = m_Registry.view<TransformComponent, PointLightComponent>();
+		for (auto&& [entity, transform, light] : pointLightView.each())
+			renderer->AddPointLight(light.Light, transform.Translation);
+		auto spotLightView = m_Registry.view<TransformComponent, SpotLightComponent>();
+		for (auto&& [entity, transform, light] : spotLightView.each())
+			renderer->AddSpotLight(light.Light, transform.Translation, transform.Rotation);
+	}
+
+	void Scene::DrawVAOs(Ref<RendererAPI> renderer)
+	{
+		auto vertexObjectView = m_Registry.view<TransformComponent, VertexObjectComponent>();
+		for (auto&& [entity, transform, vertexObject] : vertexObjectView.each())
+		{
+			if (!vertexObject.Draw)
+				continue;
+
+			Entity ent(entity, this);
+			// If the entity has a material, draw it with the material
+			// If not, draw the entity with a beautiful magenta color so we know something is wrong
+			if (ent.HasComponent<MaterialComponent>())
+			{
+				auto& materialComp = ent.GetComponent<MaterialComponent>();
+				renderer->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, materialComp.Materials[materialComp.UsedMaterialIndex], transform.GetTransfrom());
+			}
+			else
+			{
+				Material mat;
+				mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
+				renderer->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, mat, transform.GetTransfrom());
+			}
+		}
+	}
+
+	void Scene::DrawMeshes(Ref<RendererAPI> renderer)
+	{
+		auto meshView = m_Registry.view<TransformComponent, MeshComponent>();
+		for (auto&& [entity, transform, mesh] : meshView.each())
+		{
+			if (!mesh.Draw)
+				continue;
+
+			Entity ent(entity, this);
+			// If the entity has a material, draw it with the material
+			// If not, draw the entity with a beautiful magenta color so we know something is wrong
+			if (ent.HasComponent<MaterialComponent>())
+			{
+				auto& materialComp = ent.GetComponent<MaterialComponent>();
+				renderer->Draw(mesh.Mesh, materialComp.Materials[materialComp.UsedMaterialIndex], transform.GetTransfrom());
+			}
+			else
+			{
+				Material mat;
+				mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
+				mat.UseColors = true;
+				renderer->Draw(mesh.Mesh, mat, transform.GetTransfrom());
+			}
+		}
+	}
+
+	void Scene::DrawModels(Ref<RendererAPI> renderer)
+	{
+		auto modelView = m_Registry.view<TransformComponent, ModelComponent, MaterialComponent>();
+		for (auto&& [entity, transform, model, material] : modelView.each())
+		{
+			if (model.Draw)
+				renderer->Draw(model.Model, material.Materials, transform.GetTransfrom());
+		}
+	}
+
+	void Scene::ImGui(double timestep)
+	{
 		auto imguiView = m_Registry.view<ImGuiComponent>();
 		for (auto&& [entity, script] : imguiView.each())
 		{

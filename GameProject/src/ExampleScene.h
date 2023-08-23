@@ -2,6 +2,7 @@
 #include <Core/Timer.h>
 #include <Scene/Entity.h>
 #include <Scene/Components.h>
+#include <Graphics/Primitives/Plane.h>
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -14,15 +15,40 @@ public:
 	{
 		Application::Get()->GetRenderer ()->SetProjection(45.0f, 1280.0f / 720.0f, 0.1f, 1000.0f);
 
+		m_PhysicsWorld = CreateRef<PhysicsWorld>();
+
 		Ref<Model> peachModel = CreateRef<Model>("Peach.fbx");
-		std::vector<Material> peachMaterials = peachModel->LoadMaterials();
 		Ref<Model> bananaModel = CreateRef<Model>("Banana.fbx");
+		std::vector<Material> peachMaterials = peachModel->LoadMaterials();
 		std::vector<Material> bananaMaterials = bananaModel->LoadMaterials();
+
+		RigidBody sphereRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Dynamic);
+		RigidBody planeRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Static, glm::vec3(0.0f, -5.0f, 0.0f));
+		sphereRigidBody.AddSphereCollider(1.0f);
+		planeRigidBody.AddBoxCollider(glm::vec3(10.0f, 0.0f, 10.0f));
 
 		m_Model = CreateEntity();
 		m_Model.AddComponent<TransformComponent>();
 		m_Model.AddComponent<ModelComponent>(peachModel);
 		m_Model.AddComponent<MaterialComponent>(peachMaterials);
+		m_Model.AddComponent<PhysicsComponent>(sphereRigidBody);
+
+		m_Plane = CreateEntity();
+		auto& planeTransform = m_Plane.AddComponent<TransformComponent>();
+		planeTransform.Translation = glm::vec3(0.0f, -5.0f, 0.0f);
+		// planeTransform.Scale = glm::vec3(20.0f, 1.0f, 20.0f);
+		m_Plane.AddComponent<MeshComponent>(CreateRef<Plane>(5, 5));
+		m_Plane.AddComponent<PhysicsComponent>(planeRigidBody);
+		auto& planeImGui = m_Plane.AddComponent<ImGuiComponent>();
+		planeImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
+		{
+			auto& transform = ent.GetComponent<TransformComponent>();
+		
+			ImGui::Begin("Plane");
+			ImGui::DragFloat3("Position", glm::value_ptr(transform.Translation), 0.1f);
+			ImGui::DragFloat3("Scale", glm::value_ptr(transform.Scale), 0.1f);
+			ImGui::End();
+		};
 
 		m_Camera = CreateEntity();
 		auto& camTransform = m_Camera.AddComponent<TransformComponent>();
@@ -72,6 +98,7 @@ private:
 
 private:
 	Entity m_Model;
+	Entity m_Plane;
 	Entity m_Camera;
 	Entity m_Light;
 };
