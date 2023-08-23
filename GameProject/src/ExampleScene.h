@@ -36,14 +36,25 @@ public:
 		modelScript.OnUpdate = [&](Entity ent, double timestep)
 		{
 			auto& physics = ent.GetComponent<PhysicsComponent>();
-			if (m_KeysDown.Z)
-				physics.RigidBody.SetVelocity(glm::vec3(0.0f, 10.0f, 0.0f));
+			glm::vec3 speed = physics.RigidBody.GetVelocity();
+			float maxSpeed = 5.0f;
+
+			if (m_KeysDown.Up && speed.z > -maxSpeed)
+				physics.RigidBody.AddVelocity(glm::vec3(0.0f, 0.0f, -1.0f));
+			if (m_KeysDown.Down && speed.z < maxSpeed)
+				physics.RigidBody.AddVelocity(glm::vec3(0.0f, 0.0f, 1.0f));
+			if (m_KeysDown.Right && speed.x < maxSpeed)
+				physics.RigidBody.AddVelocity(glm::vec3(1.0f, 0.0f, 0.0f));
+			if (m_KeysDown.Left && speed.x > -maxSpeed)
+				physics.RigidBody.AddVelocity(glm::vec3(-1.0f, 0.0f, 0.0f));
+			if (m_KeysDown.Space && speed.y < maxSpeed)
+				physics.RigidBody.AddVelocity(glm::vec3(0.0f, 1.0f, 0.0f));
 		};
 
 		m_Plane = CreateEntity();
 		auto& planeTransform = m_Plane.AddComponent<TransformComponent>();
 		planeTransform.Translation = glm::vec3(0.0f, -5.0f, 0.0f);
-		planeTransform.Scale = glm::vec3(20.0f, 1.0f, 20.0f);
+		planeTransform.Scale = glm::vec3(10.0f, 1.0f, 10.0f);
 		m_Plane.AddComponent<MeshComponent>(CreateRef<Plane>(1, 1));
 		m_Plane.AddComponent<PhysicsComponent>(planeRigidBody);
 
@@ -86,13 +97,29 @@ private:
 	}
 	void OnKeyDown(KeyDownEvent* event)
 	{
-		if (event->Keycode == BANANA_KEY_Z)
-			m_KeysDown.Z = true;
+		if (event->Keycode == BANANA_KEY_UP)
+			m_KeysDown.Up = true;
+		if (event->Keycode == BANANA_KEY_DOWN)
+			m_KeysDown.Down = true;
+		if (event->Keycode == BANANA_KEY_RIGHT)
+			m_KeysDown.Right = true;
+		if (event->Keycode == BANANA_KEY_LEFT)
+			m_KeysDown.Left = true;
+		if (event->Keycode == BANANA_KEY_SPACE)
+			m_KeysDown.Space = true;
 	}
 	void OnKeyUp(KeyUpEvent* event)
 	{
-		if (event->Keycode == BANANA_KEY_Z)
-			m_KeysDown.Z = false;
+		if (event->Keycode == BANANA_KEY_UP)
+			m_KeysDown.Up = false;
+		if (event->Keycode == BANANA_KEY_DOWN)
+			m_KeysDown.Down = false;
+		if (event->Keycode == BANANA_KEY_RIGHT)
+			m_KeysDown.Right = false;
+		if (event->Keycode == BANANA_KEY_LEFT)
+			m_KeysDown.Left = false;
+		if (event->Keycode == BANANA_KEY_SPACE)
+			m_KeysDown.Space = false;
 	}
 
 private:
@@ -103,6 +130,10 @@ private:
 
 	struct KeysDown
 	{
-		bool Z = false;
+		bool Up = false;
+		bool Down = false;
+		bool Right = false;
+		bool Left = false;
+		bool Space = false;
 	} m_KeysDown;
 };

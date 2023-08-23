@@ -53,6 +53,12 @@ namespace Banana
 		m_RigidBody->enableGravity(takesGravity);
 	}
 
+	void RigidBody::AddVelocity(glm::vec3 velocity)
+	{
+		rp3d::Vector3 newVelocity = m_RigidBody->getLinearVelocity() + RP3DVec3(velocity);
+		m_RigidBody->setLinearVelocity(newVelocity);
+	}
+
 	void RigidBody::SetVelocity(glm::vec3 velocity)
 	{
 		m_RigidBody->setLinearVelocity(RP3DVec3(velocity));
@@ -81,5 +87,10 @@ namespace Banana
 	glm::vec3 RigidBody::GetRotation()
 	{
 		return QuaternionToEuler(m_RigidBody->getTransform().getOrientation());
+	}
+
+	glm::vec3 RigidBody::GetVelocity()
+	{
+		return GLMVec3(m_RigidBody->getLinearVelocity());
 	}
 }
