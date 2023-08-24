@@ -130,8 +130,6 @@ namespace Banana
 		Material mat;
 
 		aiColor3D color;
-		assimpMat->Get(AI_MATKEY_COLOR_AMBIENT, color);
-		mat.ColorAmbient = glm::vec3(color.r, color.g, color.b);
 		assimpMat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
 		mat.ColorDiffuse = glm::vec3(color.r, color.g, color.b);
 		assimpMat->Get(AI_MATKEY_COLOR_SPECULAR, color);
@@ -140,9 +138,6 @@ namespace Banana
 		// Textures
 		TextureSpecs specs(TextureWrapping::ClampToEdge, TextureFiltering::Linear);
 		aiString str;
-		assimpMat->GetTexture(aiTextureType_AMBIENT, mesh->mMaterialIndex, &str);
-		if (str.length > 0)
-			mat.TextureAmbient = Texture::Create(specs, str.C_Str());
 		assimpMat->GetTexture(aiTextureType_DIFFUSE, mesh->mMaterialIndex, &str);
 		if (str.length > 0)
 			mat.TextureDiffuse = Texture::Create(specs, str.C_Str());

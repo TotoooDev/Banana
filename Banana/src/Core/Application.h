@@ -26,6 +26,7 @@ namespace Banana
 		Ref<RendererAPI> GetRenderer() { return m_Renderer; }
 		EventBus* GetEventBus() { return &m_EventBus; }
 		ScenePool* GetScenePool() { return &m_ScenePool; }
+		WindowSpecs GetWindowSpecs() { return m_Window.GetSpecs(); }
 	
 		void Run();
 

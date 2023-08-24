@@ -18,9 +18,10 @@ public:
 		m_PhysicsWorld = CreateRef<PhysicsWorld>();
 		RigidBody sphereRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Dynamic);
 		RigidBody planeRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Static, glm::vec3(0.0f, -5.0f, 0.0f));
-		sphereRigidBody.AddSphereCollider(1.0f);
+		Collider sphereCollider = sphereRigidBody.AddSphereCollider(1.0f);
+		sphereCollider.SetFriction(10.0f);
 		sphereRigidBody.ApplyForce(glm::vec3(-100.0f, 200.0f, 100.0f));
-		planeRigidBody.AddBoxCollider(glm::vec3(10.0f, 0.0f, 10.0f));
+		planeRigidBody.AddBoxCollider(glm::vec3(20.0f, 0.0f, 20.0f));
 
 		Ref<Model> peachModel = CreateRef<Model>("Peach.fbx");
 		Ref<Model> bananaModel = CreateRef<Model>("Banana.fbx");
@@ -29,32 +30,59 @@ public:
 
 		m_Model = CreateEntity();
 		m_Model.AddComponent<TransformComponent>();
-		m_Model.AddComponent<ModelComponent>(peachModel);
-		m_Model.AddComponent<MaterialComponent>(peachMaterials);
+		m_Model.AddComponent<ModelComponent>(bananaModel);
+		m_Model.AddComponent<MaterialComponent>(bananaMaterials);
 		m_Model.AddComponent<PhysicsComponent>(sphereRigidBody);
 		auto& modelScript = m_Model.AddComponent<ScriptableComponent>();
 		modelScript.OnUpdate = [&](Entity ent, double timestep)
 		{
 			auto& physics = ent.GetComponent<PhysicsComponent>();
-			glm::vec3 speed = physics.RigidBody.GetVelocity();
+			glm::vec3 velocity = physics.RigidBody.GetVelocity();
+			float speed = 3.0f;
 			float maxSpeed = 5.0f;
 
-			if (m_KeysDown.Up && speed.z > -maxSpeed)
-				physics.RigidBody.AddVelocity(glm::vec3(0.0f, 0.0f, -1.0f));
-			if (m_KeysDown.Down && speed.z < maxSpeed)
-				physics.RigidBody.AddVelocity(glm::vec3(0.0f, 0.0f, 1.0f));
-			if (m_KeysDown.Right && speed.x < maxSpeed)
-				physics.RigidBody.AddVelocity(glm::vec3(1.0f, 0.0f, 0.0f));
-			if (m_KeysDown.Left && speed.x > -maxSpeed)
-				physics.RigidBody.AddVelocity(glm::vec3(-1.0f, 0.0f, 0.0f));
-			if (m_KeysDown.Space && speed.y < maxSpeed)
-				physics.RigidBody.AddVelocity(glm::vec3(0.0f, 1.0f, 0.0f));
+			if (m_KeysDown.Up)
+			{
+				if (velocity.z > -maxSpeed)
+					physics.RigidBody.AddVelocity(glm::vec3(0.0f, 0.0f, -5.0f));
+				else
+					physics.RigidBody.SetVelocity(glm::vec3(velocity.x, velocity.y, -maxSpeed));
+			}
+			if (m_KeysDown.Down)
+			{
+				if (velocity.z < maxSpeed)
+					physics.RigidBody.AddVelocity(glm::vec3(0.0f, 0.0f, 5.0f));
+				else
+					physics.RigidBody.SetVelocity(glm::vec3(velocity.x, velocity.y, maxSpeed));
+			}
+			if (m_KeysDown.Right)
+			{
+				if (velocity.x < maxSpeed)
+					physics.RigidBody.AddVelocity(glm::vec3(5.0f, 0.0f, 0.0f));
+				else
+					physics.RigidBody.SetVelocity(glm::vec3(maxSpeed, velocity.y, velocity.z));
+			}
+			if (m_KeysDown.Left)
+			{
+				if (velocity.x > -maxSpeed)
+					physics.RigidBody.AddVelocity(glm::vec3(-5.0f, 0.0f, 0.0f));
+				else
+					physics.RigidBody.SetVelocity(glm::vec3(-maxSpeed, velocity.y, velocity.z));
+			}
+			if (m_KeysDown.Space)
+			{
+				if (velocity.y < maxSpeed)
+					physics.RigidBody.AddVelocity(glm::vec3(0.0f, 5.0f, 0.0f));
+				else
+					physics.RigidBody.SetVelocity(glm::vec3(velocity.x, maxSpeed, velocity.z));
+			}
+
 		};
 
 		m_Plane = CreateEntity();
 		auto& planeTransform = m_Plane.AddComponent<TransformComponent>();
 		planeTransform.Translation = glm::vec3(0.0f, -5.0f, 0.0f);
-		planeTransform.Scale = glm::vec3(10.0f, 1.0f, 10.0f);
+		planeTransform.Scale = glm::vec3(20.0f, 1.0f, 20.0f);
 		m_Plane.AddComponent<MeshComponent>(CreateRef<Plane>(1, 1));
 		m_Plane.AddComponent<PhysicsComponent>(planeRigidBody);
 

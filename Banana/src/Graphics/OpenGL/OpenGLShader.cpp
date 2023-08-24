@@ -126,4 +126,8 @@ namespace Banana
     {
         glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &value[0][0]);
     }
+    void OpenGLShader::SetTexture(Ref<Texture> value, const std::string& name)
+    {
+        SetInt(value->GetID(), name);
+    }
 }

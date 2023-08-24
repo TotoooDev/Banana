@@ -87,7 +87,7 @@ namespace Banana
 			DrawMeshes(renderer);
 			DrawModels(renderer);
 
-			renderer->EndScene();
+			renderer->RenderScene();
 		}
 	}
 
@@ -124,6 +124,8 @@ namespace Banana
 			{
 				Material mat;
 				mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
+				mat.ColorSpecular = glm::vec3(1.0f, 0.0f, 1.0f);
+				mat.UseColors = true;
 				renderer->Draw(vertexObject.ObjectVAO, vertexObject.ObjectEBO, mat, transform.GetTransfrom());
 			}
 		}
@@ -149,6 +151,7 @@ namespace Banana
 			{
 				Material mat;
 				mat.ColorDiffuse = glm::vec3(1.0f, 0.0f, 1.0f);
+				mat.ColorSpecular = glm::vec3(1.0f, 0.0f, 1.0f);
 				mat.UseColors = true;
 				renderer->Draw(mesh.Mesh, mat, transform.GetTransfrom());
 			}

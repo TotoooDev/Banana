@@ -45,8 +45,9 @@ namespace Banana
 		static Ref<Texture> Create(const TextureSpecs& specs, const std::string& path, bool flip = false);
 
 		virtual void LoadFromFile(const std::string& path, bool flip = false) = 0;
-
 		virtual void Bind(unsigned int unit = 0) = 0;
+
+		virtual unsigned int GetID() = 0;
 
 	protected:
 		TextureSpecs m_Specs;

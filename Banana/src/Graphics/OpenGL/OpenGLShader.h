@@ -17,6 +17,8 @@ namespace Banana
 		void SetMat2(const glm::mat2& value, const std::string& name);
 		void SetMat3(const glm::mat3& value, const std::string& name);
 		void SetMat4(const glm::mat4& value, const std::string& name);
+		void SetTexture(Ref<Texture> value, const std::string& name);
+
 	private:
 		void CreateFromString(const std::string& vertexSource, const std::string& fragmentSource);
 

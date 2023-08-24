@@ -13,6 +13,8 @@ namespace Banana
 		virtual void LoadFromFile(const std::string& path, bool flip = false) override;
 		virtual void Bind(unsigned int unit = 0) override;
 
+		virtual unsigned int GetID() override { return m_ID; }
+
 	private:
 		void CreateTexture();
 

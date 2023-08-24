@@ -1,5 +1,7 @@
 #include <Core/Log.h>
 #include <Graphics/OpenGL/OpenGLRendererAPI.h>
+#include <Core/Application.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Banana
 {
@@ -24,6 +26,20 @@ namespace Banana
 		// Compile shaders
 		m_ShaderColor = Shader::Create("shaders/color/color.vert", "shaders/color/color.frag");
 		m_ShaderTexture = Shader::Create("shaders/texture/texture.vert", "shaders/texture/texture.frag");
+		m_ShaderDepth = Shader::Create("shaders/depth/depth.vert", "shaders/depth/depth.frag");
+
+		// Create framebuffers
+		FramebufferSpecs specs;
+		specs.Width = 1024;
+		specs.Height = 1024;
+		specs.AddTexture(FramebufferTexture::Depth24Stencil8);
+		m_DepthMap = Framebuffer::Create(specs);
+
+		// Set other stuff
+		m_ScreenWidth = Application::Get()->GetWindowSpecs().Width;
+		m_ScreenHeight = Application::Get()->GetWindowSpecs().Height;
+
+		Application::Get()->GetEventBus()->Subscribe(this, &OpenGLRendererAPI::OnWindowResized);
 	}
 
 	void OpenGLRendererAPI::SetViewport(int x, int y, int width, int height)
@@ -37,40 +53,53 @@ namespace Banana
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLRendererAPI::Draw(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)
+	void OpenGLRendererAPI::RenderScene()
 	{
-		// Use the custom shader if it points to something
-		if (material.UseColors)
+		ShadowPass();
+		ColorPass();
+	}
+
+	void OpenGLRendererAPI::ShadowPass()
+	{
+		// Calculate the light space matrix
+		glm::mat4 lightProjection, lightView;
+		float nearPlane = 0.1f, farPlane = 10.0f;
+		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
+		lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		m_LightSpaceMatrix = lightProjection * lightView;
+
+		SetViewport(0, 0, m_DepthMap->GetSpec().Width, m_DepthMap->GetSpec().Height);
+		m_DepthMap->Bind();
 		{
-			m_CurrentShader = m_CustomShader ? m_CustomShader : m_ShaderColor;
-			DrawColor(vao, ebo, material, transform);
+			Clear();
+			glCullFace(GL_FRONT);
+			m_ShaderDepth->Bind();
+			m_ShaderDepth->SetMat4(m_LightSpaceMatrix, "uLightSpaceMatrix");
+			DrawObjects(m_ShaderDepth);
+			glCullFace(GL_BACK);
 		}
-		else
+		m_DepthMap->Unbind();
+	}
+
+	void OpenGLRendererAPI::ColorPass()
+	{
+		SetViewport(0, 0, m_ScreenWidth, m_ScreenHeight);
+		Clear();
+		m_DepthMap->BindTexture(0); // Bind the depth texture (it's the only texture so we know it's index 0)
+		DrawObjects(m_ShaderColor);
+	}
+
+	void OpenGLRendererAPI::DrawObjects(Ref<Shader> shader)
+	{
+		for (auto& drawableObject : m_ObjectsToDraw)
 		{
-			m_CurrentShader = m_CustomShader ? m_CustomShader : m_ShaderTexture;
-			DrawTextured(vao, ebo, material, transform);
+			m_CurrentShader = m_CustomShader ? m_CustomShader : shader;
+			DrawObject(drawableObject.VAO, drawableObject.EBO, drawableObject.Mat, drawableObject.Transform);
+			m_CurrentShader = nullptr;
 		}
-
-		m_CurrentShader = nullptr;
 	}
 
-	void OpenGLRendererAPI::Draw(Ref<Mesh> mesh, Material material, glm::mat4 transform)
-	{
-		Draw(mesh->GetVAO(), mesh->GetEBO(), material, transform);
-	}
-
-	void OpenGLRendererAPI::Draw(Ref<Model> model, std::vector<Material> materials, glm::mat4 transform)
-	{
-		for (auto& mesh : model->GetMeshes())
-			Draw(mesh, materials[mesh->GetMaterialIndex()], transform);
-	}
-
-	void OpenGLRendererAPI::DrawTextured(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)
-	{
-
-	}
-
-	void OpenGLRendererAPI::DrawColor(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)
+	void OpenGLRendererAPI::DrawObject(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)
 	{
 		if (m_Target)
 			m_Target->Bind();
@@ -84,12 +113,30 @@ namespace Banana
 		m_CurrentShader->SetMat4(transform, "uModel");
 		m_CurrentShader->SetMat4(m_CurrentView, "uView");
 		m_CurrentShader->SetMat4(m_CurrentProjection, "uProjection");
-		m_CurrentShader->SetVec3(material.ColorDiffuse, "uColor");
+
+		m_CurrentShader->SetInt(material.UseColors, "uMaterial.UseColors");
+		m_CurrentShader->SetVec3(material.ColorDiffuse, "uMaterial.ColorDiffuse");
+		m_CurrentShader->SetVec3(material.ColorSpecular, "uMaterial.ColorSpecular");
+		if (material.TextureDiffuse)
+			m_CurrentShader->SetTexture(material.TextureDiffuse, "uMaterial.TextureDiffuse");
+		if (material.TextureSpecular)
+			m_CurrentShader->SetTexture(material.TextureSpecular, "uMaterial.TextureSpecular");
+
+		m_CurrentShader->SetMat4(m_LightSpaceMatrix, "uLightSpaceMatrix");
 
 		vao->Bind();
 		ebo->Bind();
 
 		glDrawElements(GL_TRIANGLES, ebo->GetCount(), GL_UNSIGNED_INT, 0);
+	}
+
+	void OpenGLRendererAPI::OnWindowResized(WindowResizedEvent* event)
+	{
+		if (event->Width == 0 || event->Height == 0)
+			return;
+
+		m_ScreenWidth = event->Width;
+		m_ScreenHeight = event->Height;
 	}
 
 	#ifdef BANANA_DEBUG

@@ -1,9 +1,10 @@
 #pragma once
 #include <Graphics/RendererAPI.h>
+#include <Graphics/Framebuffer.h>
+#include <Events/Events.h>
 
 namespace Banana
 {
-
 	class OpenGLRendererAPI : public RendererAPI
 	{
 	public:
@@ -11,19 +12,26 @@ namespace Banana
 
 		virtual void SetViewport(int x, int y, int width, int height) override;
 		virtual void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f) override;
-
-		virtual void Draw(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform) override;
-		virtual void Draw(Ref<Mesh> mesh, Material material, glm::mat4 transform) override;
-		virtual void Draw(Ref<Model> model, std::vector<Material> materials, glm::mat4 transform) override;
+		virtual void RenderScene() override;
 
 	private:
-		void DrawTextured(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform);
-		void DrawColor(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform);
+		void ShadowPass();
+		void ColorPass();
+
+		void DrawObjects(Ref<Shader> shader);
+		void DrawObject(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform);
+
+		void OnWindowResized(WindowResizedEvent* event);
 
 		#ifdef BANANA_OPENGL_DEBUG
 			void InitOpenGLDebugOutput();
 		#endif
 	private:
 		static bool m_WasGLEWInit;
+		unsigned int m_ScreenWidth, m_ScreenHeight;
+
+		Ref<Shader> m_ShaderDepth;
+		Ref<Framebuffer> m_DepthMap;
+		glm::mat4 m_LightSpaceMatrix;
 	};
 }

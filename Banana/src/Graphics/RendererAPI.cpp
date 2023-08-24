@@ -1,6 +1,7 @@
 #include <Core/Log.h>
 #include <Graphics/RendererAPI.h>
 #include <Graphics/OpenGL/OpenGLRendererAPI.h>
+#include <Core/Application.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Banana
@@ -36,18 +37,28 @@ namespace Banana
 
 	void RendererAPI::BeginScene(Ref<Camera> cam, glm::vec3 camPos)
 	{
+		m_ObjectsToDraw.clear();
 		m_NumLights = 0;
 		m_CurrentView = cam->GetViewMatrix(camPos);
 	}
 
-	void RendererAPI::EndScene()
+	void RendererAPI::Draw(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)
 	{
-		m_NumLights = 0;
-		m_CurrentView = glm::mat4(1.0f);
+		m_ObjectsToDraw.push_back({ vao, ebo, material, transform });
+	}
+	void RendererAPI::Draw(Ref<Mesh> mesh, Material material, glm::mat4 transform)
+	{
+		Draw(mesh->GetVAO(), mesh->GetEBO(), material, transform);
+	}
+	void RendererAPI::Draw(Ref<Model> model, std::vector<Material> materials, glm::mat4 transform)
+	{
+		for (auto& mesh : model->GetMeshes())
+			Draw(mesh, materials[mesh->GetMaterialIndex()], transform);
 	}
 
 	void RendererAPI::AddDirectionalLight(const DirectionalLight& light, glm::vec3 direction)
 	{
+		m_DirectionalLights.push_back(light);
 		AddDirectionalLight(m_ShaderColor, light, direction);
 		AddDirectionalLight(m_ShaderTexture, light, direction);
 		if (m_CustomShader)
@@ -55,6 +66,7 @@ namespace Banana
 	}
 	void RendererAPI::AddPointLight(const PointLight& light, glm::vec3 pos)
 	{
+		m_PointLights.push_back(light);
 		AddPointLight(m_ShaderColor, light, pos);
 		AddPointLight(m_ShaderTexture, light, pos);
 		if (m_CustomShader)
@@ -62,6 +74,7 @@ namespace Banana
 	}
 	void RendererAPI::AddSpotLight(const SpotLight& light, glm::vec3 pos, glm::vec3 direction)
 	{
+		m_SpotLights.push_back(light);
 		AddSpotLight(m_ShaderColor, light, pos, direction);
 		AddSpotLight(m_ShaderTexture, light, pos, direction);
 		if (m_CustomShader)

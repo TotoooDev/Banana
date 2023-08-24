@@ -1,5 +1,6 @@
 #pragma once
 #include <Core/Ref.h>
+#include <Graphics/Texture.h>
 #include <string>
 #include <glm/glm.hpp>
 
@@ -19,6 +20,7 @@ namespace Banana
 		virtual void SetMat2(const glm::mat2& value, const std::string& name) = 0;
 		virtual void SetMat3(const glm::mat3& value, const std::string& name) = 0;
 		virtual void SetMat4(const glm::mat4& value, const std::string& name) = 0;
+		virtual void SetTexture(Ref<Texture> value, const std::string& name) = 0;
 
 	protected:
 		std::string m_VertexPath, m_FragmentPath;
