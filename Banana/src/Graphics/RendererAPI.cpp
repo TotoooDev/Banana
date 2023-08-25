@@ -58,7 +58,7 @@ namespace Banana
 
 	void RendererAPI::AddDirectionalLight(const DirectionalLight& light, glm::vec3 direction)
 	{
-		m_DirectionalLights.push_back(light);
+		m_DirectionalLights.push_back(std::make_pair(light, direction));
 		AddDirectionalLight(m_ShaderColor, light, direction);
 		AddDirectionalLight(m_ShaderTexture, light, direction);
 		if (m_CustomShader)

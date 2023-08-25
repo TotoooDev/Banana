@@ -18,6 +18,9 @@ namespace Banana
 		void ShadowPass();
 		void ColorPass();
 
+		std::vector<glm::vec4> GetFrustumCornersWorldSpace();
+		void CalculateLightSpaceMatrix(glm::vec3 lightDir);
+
 		void DrawObjects(Ref<Shader> shader);
 		void DrawObject(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform);
 
@@ -31,7 +34,7 @@ namespace Banana
 		unsigned int m_ScreenWidth, m_ScreenHeight;
 
 		Ref<Shader> m_ShaderDepth;
-		Ref<Framebuffer> m_DepthMap;
+		Ref<Framebuffer> m_ShadowMap;
 		glm::mat4 m_LightSpaceMatrix;
 	};
 }

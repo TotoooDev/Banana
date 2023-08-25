@@ -3,6 +3,7 @@
 #include <Scene/Entity.h>
 #include <Scene/Components.h>
 #include <Graphics/Primitives/Plane.h>
+#include <Graphics/Primitives/Icosphere.h>
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -13,7 +14,7 @@ class ExampleScene : public Scene
 public:
 	ExampleScene()
 	{
-		Application::Get()->GetRenderer()->SetProjection(45.0f, 1280.0f / 720.0f, 0.1f, 1000.0f);
+		Application::Get()->GetRenderer()->SetProjection(45.0f, 1280.0f / 720.0f, 0.1f, 100.0f);
 
 		m_PhysicsWorld = CreateRef<PhysicsWorld>();
 		RigidBody sphereRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Dynamic);
@@ -31,7 +32,7 @@ public:
 		m_Model = CreateEntity();
 		m_Model.AddComponent<TransformComponent>();
 		m_Model.AddComponent<ModelComponent>(bananaModel);
-		m_Model.AddComponent<MaterialComponent>(bananaMaterials);
+		 m_Model.AddComponent<MaterialComponent>(bananaMaterials);
 		m_Model.AddComponent<PhysicsComponent>(sphereRigidBody);
 		auto& modelScript = m_Model.AddComponent<ScriptableComponent>();
 		modelScript.OnUpdate = [&](Entity ent, double timestep)
@@ -110,7 +111,7 @@ public:
 
 		m_Light = CreateEntity();
 		auto& lightTransform = m_Light.AddComponent<TransformComponent>();
-		lightTransform.Rotation = glm::vec3(0.0f, -1.0f, 0.0f);
+		lightTransform.Rotation = glm::vec3(0.5f, -1.0f, 0.0f);
 		m_Light.AddComponent<DirectionalLightComponent>();
 
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResized);
@@ -152,6 +153,7 @@ private:
 
 private:
 	Entity m_Model;
+	Entity m_Model2;
 	Entity m_Plane;
 	Entity m_Camera;
 	Entity m_Light;

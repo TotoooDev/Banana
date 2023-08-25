@@ -33,7 +33,7 @@ namespace Banana
 		specs.Width = 1024;
 		specs.Height = 1024;
 		specs.AddTexture(FramebufferTexture::Depth24Stencil8);
-		m_DepthMap = Framebuffer::Create(specs);
+		m_ShadowMap = Framebuffer::Create(specs);
 
 		// Set other stuff
 		m_ScreenWidth = Application::Get()->GetWindowSpecs().Width;
@@ -61,15 +61,9 @@ namespace Banana
 
 	void OpenGLRendererAPI::ShadowPass()
 	{
-		// Calculate the light space matrix
-		glm::mat4 lightProjection, lightView;
-		float nearPlane = 0.1f, farPlane = 10.0f;
-		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
-		lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		m_LightSpaceMatrix = lightProjection * lightView;
-
-		SetViewport(0, 0, m_DepthMap->GetSpec().Width, m_DepthMap->GetSpec().Height);
-		m_DepthMap->Bind();
+		SetViewport(0, 0, m_ShadowMap->GetSpec().Width, m_ShadowMap->GetSpec().Height);
+		CalculateLightSpaceMatrix(m_DirectionalLights[0].second);
+		m_ShadowMap->Bind();
 		{
 			Clear();
 			glCullFace(GL_FRONT);
@@ -78,15 +72,83 @@ namespace Banana
 			DrawObjects(m_ShaderDepth);
 			glCullFace(GL_BACK);
 		}
-		m_DepthMap->Unbind();
+		m_ShadowMap->Unbind();
 	}
 
 	void OpenGLRendererAPI::ColorPass()
 	{
 		SetViewport(0, 0, m_ScreenWidth, m_ScreenHeight);
 		Clear();
-		m_DepthMap->BindTexture(0); // Bind the depth texture (it's the only texture so we know it's index 0)
+		m_ShadowMap->BindTexture(0); // Bind the depth texture (it's the only texture so we know it's index 0)
 		DrawObjects(m_ShaderColor);
+	}
+
+	std::vector<glm::vec4> OpenGLRendererAPI::GetFrustumCornersWorldSpace()
+	{
+		glm::mat4 inverse = glm::inverse(m_CurrentProjection * m_CurrentView);
+
+		std::vector<glm::vec4> frustumCorners;
+		for (unsigned int x = 0; x < 2; x++)
+		{
+			for (unsigned int y = 0; y < 2; y++)
+			{
+				for (unsigned int z = 0; z < 2; z++)
+				{
+					glm::vec4 pt = inverse * glm::vec4(
+						2.0f * x - 1.0f,
+						2.0f * y - 1.0f,
+						2.0f * z - 1.0f,
+						1.0f
+					);
+					frustumCorners.push_back(pt / pt.w);
+				}
+			}
+		}
+
+		return frustumCorners;
+	}
+
+	void OpenGLRendererAPI::CalculateLightSpaceMatrix(glm::vec3 lightDir)
+	{
+		// Calculate the light view matrix
+		std::vector<glm::vec4> corners = GetFrustumCornersWorldSpace();
+		glm::vec3 center = glm::vec3(0.0f);
+		for (auto& v : corners)
+			center += glm::vec3(v);
+		center /= corners.size();
+		glm::mat4 lightView = glm::lookAt(center + lightDir, center, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		// Calculate the light projection matrix
+		float minX = std::numeric_limits<float>::max();
+		float maxX = std::numeric_limits<float>::lowest();
+		float minY = std::numeric_limits<float>::max();
+		float maxY = std::numeric_limits<float>::lowest();
+		float minZ = std::numeric_limits<float>::max();
+		float maxZ = std::numeric_limits<float>::lowest();
+		for (auto& v : corners)
+		{
+			glm::vec4 trf = lightView * v;
+			minX = std::min(minX, trf.x);
+			maxX = std::max(maxX, trf.x);
+			minY = std::min(minY, trf.y);
+			maxY = std::max(maxY, trf.y);
+			minZ = std::min(minZ, trf.z);
+			maxZ = std::max(maxZ, trf.z);
+		}
+
+		float zMult = 50.0f;
+		if (minZ < 0.0f)
+			minZ *= zMult;
+		else
+			minZ /= zMult;
+		if (maxZ < 0.0f)
+			maxZ /= zMult;
+		else
+			maxZ *= zMult;
+
+		glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
+		
+		m_LightSpaceMatrix = lightProjection * lightView;
 	}
 
 	void OpenGLRendererAPI::DrawObjects(Ref<Shader> shader)

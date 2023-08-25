@@ -58,7 +58,7 @@ namespace Banana
 			glm::mat4 Transform;
 		};
 		std::vector<DrawableObject> m_ObjectsToDraw;
-		std::vector<DirectionalLight> m_DirectionalLights;
+		std::vector<std::pair<DirectionalLight, glm::vec3>> m_DirectionalLights;
 		std::vector<PointLight> m_PointLights;
 		std::vector<SpotLight> m_SpotLights;
 
