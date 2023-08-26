@@ -11,7 +11,7 @@ namespace Banana
 		OpenGLRendererAPI();
 
 		virtual void SetViewport(int x, int y, int width, int height) override;
-		virtual void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f) override;
+		virtual void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f) override;
 		virtual void RenderScene() override;
 
 	private:

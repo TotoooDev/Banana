@@ -46,7 +46,7 @@ namespace Banana
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 			aiMatrix4x4 assimpTransform = node->mTransformation;
 			glm::mat4 transform;
-			//the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
+			// The a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
 			transform[0][0] = assimpTransform.a1; transform[1][0] = assimpTransform.a2; transform[2][0] = assimpTransform.a3; transform[3][0] = assimpTransform.a4;
 			transform[0][1] = assimpTransform.b1; transform[1][1] = assimpTransform.b2; transform[2][1] = assimpTransform.b3; transform[3][1] = assimpTransform.b4;
 			transform[0][2] = assimpTransform.c1; transform[1][2] = assimpTransform.c2; transform[2][2] = assimpTransform.c3; transform[3][2] = assimpTransform.c4;

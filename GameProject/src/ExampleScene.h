@@ -32,7 +32,7 @@ public:
 		m_Model = CreateEntity();
 		m_Model.AddComponent<TransformComponent>();
 		m_Model.AddComponent<ModelComponent>(bananaModel);
-		 m_Model.AddComponent<MaterialComponent>(bananaMaterials);
+		m_Model.AddComponent<MaterialComponent>(bananaMaterials);
 		m_Model.AddComponent<PhysicsComponent>(sphereRigidBody);
 		auto& modelScript = m_Model.AddComponent<ScriptableComponent>();
 		modelScript.OnUpdate = [&](Entity ent, double timestep)
@@ -41,7 +41,7 @@ public:
 			glm::vec3 velocity = physics.RigidBody.GetVelocity();
 			float speed = 3.0f;
 			float maxSpeed = 5.0f;
-
+		
 			if (m_KeysDown.Up)
 			{
 				if (velocity.z > -maxSpeed)
@@ -77,7 +77,7 @@ public:
 				else
 					physics.RigidBody.SetVelocity(glm::vec3(velocity.x, maxSpeed, velocity.z));
 			}
-
+		
 		};
 
 		m_Plane = CreateEntity();
@@ -111,7 +111,7 @@ public:
 
 		m_Light = CreateEntity();
 		auto& lightTransform = m_Light.AddComponent<TransformComponent>();
-		lightTransform.Rotation = glm::vec3(0.5f, -1.0f, 0.0f);
+		lightTransform.Rotation = glm::normalize(glm::vec3(20.0f, -50.0f, 20.0f));
 		m_Light.AddComponent<DirectionalLightComponent>();
 
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResized);
@@ -153,7 +153,6 @@ private:
 
 private:
 	Entity m_Model;
-	Entity m_Model2;
 	Entity m_Plane;
 	Entity m_Camera;
 	Entity m_Light;

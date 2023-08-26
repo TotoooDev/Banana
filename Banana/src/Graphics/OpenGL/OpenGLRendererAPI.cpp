@@ -30,8 +30,8 @@ namespace Banana
 
 		// Create framebuffers
 		FramebufferSpecs specs;
-		specs.Width = 1024;
-		specs.Height = 1024;
+		specs.Width = 4096;
+		specs.Height = 4096;
 		specs.AddTexture(FramebufferTexture::Depth24Stencil8);
 		m_ShadowMap = Framebuffer::Create(specs);
 
@@ -47,9 +47,9 @@ namespace Banana
 		glViewport(x, y, width, height);
 	}
 
-	void OpenGLRendererAPI::Clear(float r, float g, float b)
+	void OpenGLRendererAPI::Clear(float r, float g, float b, float a)
 	{
-		glClearColor(r, g, b, 1.0f);
+		glClearColor(r, g, b, a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
@@ -67,8 +67,6 @@ namespace Banana
 		{
 			Clear();
 			glCullFace(GL_FRONT);
-			m_ShaderDepth->Bind();
-			m_ShaderDepth->SetMat4(m_LightSpaceMatrix, "uLightSpaceMatrix");
 			DrawObjects(m_ShaderDepth);
 			glCullFace(GL_BACK);
 		}
@@ -136,7 +134,7 @@ namespace Banana
 			maxZ = std::max(maxZ, trf.z);
 		}
 
-		float zMult = 50.0f;
+		float zMult = 1.0f;
 		if (minZ < 0.0f)
 			minZ *= zMult;
 		else
@@ -153,12 +151,10 @@ namespace Banana
 
 	void OpenGLRendererAPI::DrawObjects(Ref<Shader> shader)
 	{
-		for (auto& drawableObject : m_ObjectsToDraw)
-		{
-			m_CurrentShader = m_CustomShader ? m_CustomShader : shader;
-			DrawObject(drawableObject.VAO, drawableObject.EBO, drawableObject.Mat, drawableObject.Transform);
-			m_CurrentShader = nullptr;
-		}
+		m_CurrentShader = m_CustomShader ? m_CustomShader : shader;
+		for (auto& object : m_ObjectsToDraw)
+			DrawObject(object.VAO, object.EBO, object.Mat, object.Transform);
+		m_CurrentShader = nullptr;
 	}
 
 	void OpenGLRendererAPI::DrawObject(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)

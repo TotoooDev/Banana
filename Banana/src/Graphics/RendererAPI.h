@@ -36,7 +36,7 @@ namespace Banana
 
 		// Platform specific methods
 		virtual void SetViewport(int x, int y, int width, int height) = 0;
-		virtual void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f) = 0;
+		virtual void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f) = 0;
 		virtual void RenderScene() = 0;
 
 	protected:
