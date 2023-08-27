@@ -14,6 +14,15 @@
 namespace Banana
 {
 	// Essentials
+	struct TagComponent
+	{
+		std::string Tag;
+
+		TagComponent(const std::string& tag)
+			: Tag(tag) {}
+		TagComponent(const TagComponent&) = default;
+	};
+
 	struct TransformComponent
 	{
 		glm::vec3 Translation;
@@ -96,7 +105,6 @@ namespace Banana
 			: Model(model) {}
 		ModelComponent(const ModelComponent&) = default;
 	};
-
 	struct VertexObjectComponent
 	{
 		Ref<VAO> ObjectVAO;

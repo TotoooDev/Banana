@@ -15,8 +15,10 @@ namespace Banana
 	public:
 		virtual ~Scene();
 
-		Entity CreateEntity();
+		Entity CreateEntity(const std::string& tag = "");
 		void DeleteEntity(Entity entity);
+
+		Entity GetEntityByTag(const std::string& tag); // Just a for loop over all the tag components so it *might* be a little bit slow :)
 
 		void UpdateScene(Ref<RendererAPI> renderer, double timestep);
 		virtual void OnSetAsCurrent() {}

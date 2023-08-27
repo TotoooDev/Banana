@@ -23,6 +23,7 @@ namespace Banana
 		void operator=(const Application&) = delete;
 	
 		static Application* Get() { return m_Instance; }
+		float GetTimestep() { return m_Timestep; }
 		Ref<RendererAPI> GetRenderer() { return m_Renderer; }
 		EventBus* GetEventBus() { return &m_EventBus; }
 		ScenePool* GetScenePool() { return &m_ScenePool; }

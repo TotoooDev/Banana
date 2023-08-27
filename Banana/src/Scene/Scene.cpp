@@ -18,10 +18,13 @@ namespace Banana
 		OnDelete();
 	}
 
-	Entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(const std::string& tag)
 	{
 		entt::entity id = m_Registry.create();
-		return Entity(id, this);
+		Entity ent(id, this);
+		if (!tag.empty())
+			ent.AddComponent<TagComponent>(tag);
+		return ent;
 	}
 
 	void Scene::DeleteEntity(Entity entity)
@@ -30,6 +33,17 @@ namespace Banana
 		if (entity.HasComponent<ScriptableComponent>())
 			entity.GetComponent<ScriptableComponent>().OnEnd(entity);
 		m_Registry.destroy(entity.m_Identifier);
+	}
+
+	Entity Scene::GetEntityByTag(const std::string& tag)
+	{
+		auto tagView = m_Registry.view<TagComponent>();
+		for (auto&& [entity, tagComp] : tagView.each())
+		{
+			if (tag == tagComp.Tag)
+				return Entity(entity, this);
+		}
+		return Entity(); // Invalid entity
 	}
 
 	void Scene::UpdateScene(Ref<RendererAPI> renderer, double timestep)

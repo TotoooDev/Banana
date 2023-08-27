@@ -7,6 +7,8 @@
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <ThirdPersonCameraController.h>
+
 using namespace Banana;
 
 class ExampleScene : public Scene
@@ -29,7 +31,7 @@ public:
 		std::vector<Material> peachMaterials = peachModel->LoadMaterials();
 		std::vector<Material> bananaMaterials = bananaModel->LoadMaterials();
 
-		m_Model = CreateEntity();
+		m_Model = CreateEntity("Model");
 		m_Model.AddComponent<TransformComponent>();
 		m_Model.AddComponent<ModelComponent>(bananaModel);
 		m_Model.AddComponent<MaterialComponent>(bananaMaterials);
@@ -87,10 +89,11 @@ public:
 		m_Plane.AddComponent<MeshComponent>(CreateRef<Plane>(1, 1));
 		m_Plane.AddComponent<PhysicsComponent>(planeRigidBody);
 
-		m_Camera = CreateEntity();
+		m_Camera = CreateEntity("Camera");
 		auto& camTransform = m_Camera.AddComponent<TransformComponent>();
 		camTransform.Translation = glm::vec3(0.0f, 0.0f, 20.0f);
 		m_Camera.AddComponent<CameraComponent>(CreateRef<Camera>());
+		m_Camera.AddComponent<ThirdPersonCameraController>();
 		auto& camImGui = m_Camera.AddComponent<ImGuiComponent>();
 		camImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
 		{
@@ -107,6 +110,30 @@ public:
 
 			if (updateCamera)
 				cam.Cam->UpdateCameraVectors();
+		};
+		auto& camScript = m_Camera.AddComponent<ScriptableComponent>();
+		camScript.OnUpdate = [&](Entity ent, double timestep)
+		{
+			auto& camTransform = ent.GetComponent<TransformComponent>();
+			auto& camController = ent.GetComponent<ThirdPersonCameraController>();
+			auto& camCam = ent.GetComponent<CameraComponent>();
+
+			Entity model = GetEntityByTag("Model");
+			auto& modelTransform = model.GetComponent<TransformComponent>();
+
+			float horizontalDistance = camController.DistanceFromPlayer * glm::cos(camController.Pitch);
+			float verticalDistance = camController.DistanceFromPlayer * glm::sin(camController.Pitch);
+
+			float totalRotation = modelTransform.Rotation.y + camController.AngleAroundPlayer;
+			float offsetX = horizontalDistance * glm::sin(totalRotation);
+			float offsetZ = horizontalDistance * glm::cos(totalRotation);
+
+			camTransform.Translation.x = modelTransform.Translation.x - offsetX;
+			camTransform.Translation.y = modelTransform.Translation.y + verticalDistance;
+			camTransform.Translation.z = modelTransform.Translation.z - offsetZ;
+
+			camCam.Cam->Pitch = camController.Pitch;
+			camCam.Cam->Yaw = modelTransform.Rotation.y + camController.AngleAroundPlayer;
 		};
 
 		m_Light = CreateEntity();
