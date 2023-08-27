@@ -24,9 +24,6 @@ namespace Banana
 		void DrawObjects(Ref<Shader> shader);
 		void DrawObject(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform);
 
-		// DEBUG
-		void DrawShadowMap();
-
 		void OnWindowResized(WindowResizedEvent* event);
 
 		#ifdef BANANA_OPENGL_DEBUG
@@ -39,9 +36,5 @@ namespace Banana
 		Ref<Shader> m_ShaderDepth;
 		Ref<Framebuffer> m_ShadowMap;
 		glm::mat4 m_LightSpaceMatrix;
-
-		// DEBUG
-		float m_DepthNearPlane, m_DepthFarPlane;
-		Ref<Shader> m_ShaderQuad;
 	};
 }

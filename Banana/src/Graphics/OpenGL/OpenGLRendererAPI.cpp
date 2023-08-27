@@ -3,10 +3,6 @@
 #include <Core/Application.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-// DEBUG
-#include <imgui/imgui.h>
-#include <Graphics/Primitives/Plane.h>
-
 namespace Banana
 {
 	bool OpenGLRendererAPI::m_WasGLEWInit = false;
@@ -44,9 +40,6 @@ namespace Banana
 		m_ScreenHeight = Application::Get()->GetWindowSpecs().Height;
 
 		Application::Get()->GetEventBus()->Subscribe(this, &OpenGLRendererAPI::OnWindowResized);
-
-		// DEBUG
-		m_ShaderQuad = Shader::Create("shaders/quad/quad.vert", "shaders/quad/quad.frag");
 	}
 
 	void OpenGLRendererAPI::SetViewport(int x, int y, int width, int height)
@@ -64,7 +57,6 @@ namespace Banana
 	{
 		ShadowPass();
 		ColorPass();
-		DrawShadowMap();
 	}
 
 	void OpenGLRendererAPI::ShadowPass()
@@ -122,7 +114,7 @@ namespace Banana
 		for (auto& v : corners)
 			center += glm::vec3(v);
 		center /= corners.size();
-		glm::mat4 lightView = glm::lookAt(center + lightDir, center, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightView = glm::lookAt(center - lightDir, center, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Calculate the light projection matrix
 		float minX = std::numeric_limits<float>::max();
@@ -142,23 +134,7 @@ namespace Banana
 			maxZ = std::max(maxZ, trf.z);
 		}
 
-		static float zMult = 1.0f;
-		ImGui::Begin("Renderer");
-		ImGui::DragFloat("zMult", &zMult, 0.1f);
-		ImGui::End();
-		if (minZ < 0.0f)
-			minZ *= zMult;
-		else
-			minZ /= zMult;
-		if (maxZ < 0.0f)
-			maxZ /= zMult;
-		else
-			maxZ *= zMult;
-
-		m_DepthNearPlane = minZ;
-		m_DepthFarPlane = maxZ;
-
-		glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, m_DepthNearPlane, m_DepthFarPlane);
+		glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
 		
 		m_LightSpaceMatrix = lightProjection * lightView;
 	}
@@ -200,24 +176,6 @@ namespace Banana
 		ebo->Bind();
 
 		glDrawElements(GL_TRIANGLES, ebo->GetCount(), GL_UNSIGNED_INT, 0);
-	}
-
-	void OpenGLRendererAPI::DrawShadowMap()
-	{
-		static Ref<Mesh> planeMesh = CreateRef<Plane>(1, 1);
-
-		glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		m_ShaderQuad->Bind();
-		m_ShaderQuad->SetMat4(model, "uModel");
-		m_ShaderQuad->SetFloat(m_DepthNearPlane, "uNearPlane");
-		m_ShaderQuad->SetFloat(m_DepthFarPlane, "uFarPlane");
-		m_ShadowMap->BindTexture(0);
-
-		planeMesh->GetVAO()->Bind();
-		planeMesh->GetEBO()->Bind();
-
-		glDrawElements(GL_TRIANGLES, planeMesh->GetEBO()->GetCount(), GL_UNSIGNED_INT, 0);
 	}
 
 	void OpenGLRendererAPI::OnWindowResized(WindowResizedEvent* event)

@@ -40,6 +40,9 @@ namespace Banana
 		m_ObjectsToDraw.clear();
 		m_NumLights = 0;
 		m_CurrentView = cam->GetViewMatrix(camPos);
+		m_DirectionalLights.clear();
+		m_PointLights.clear();
+		m_SpotLights.clear();
 	}
 
 	void RendererAPI::Draw(Ref<VAO> vao, Ref<EBO> ebo, Material material, glm::mat4 transform)

@@ -111,8 +111,17 @@ public:
 
 		m_Light = CreateEntity();
 		auto& lightTransform = m_Light.AddComponent<TransformComponent>();
-		lightTransform.Rotation = glm::normalize(glm::vec3(20.0f, -50.0f, 20.0f));
+		lightTransform.Rotation = glm::vec3(1.0f, -1.0f, 1.0f);
 		m_Light.AddComponent<DirectionalLightComponent>();
+		auto& lightImGui = m_Light.AddComponent<ImGuiComponent>();
+		lightImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
+		{
+			auto& transform = ent.GetComponent<TransformComponent>();
+
+			ImGui::Begin("Directional Light");
+			ImGui::DragFloat3("Direction", glm::value_ptr(transform.Rotation), 0.01f, -1.0f, 1.0f);
+			ImGui::End();
+		};
 
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResized);
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnKeyDown);
@@ -122,7 +131,7 @@ public:
 private:
 	void OnWindowResized(WindowResizedEvent* event)
 	{
-		Application::Get()->GetRenderer()->SetProjection(45.0f, (float)event->Width / (float)event->Height, 0.1f, 1000.0f);
+		Application::Get()->GetRenderer()->SetProjection(45.0f, (float)event->Width / (float)event->Height, 0.1f, 100.0f);
 	}
 	void OnKeyDown(KeyDownEvent* event)
 	{
