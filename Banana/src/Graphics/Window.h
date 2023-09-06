@@ -32,6 +32,8 @@ namespace Banana
 		EventBus* GetEventBus() { return m_EventBus; }
 		WindowSpecs& GetSpecs() { return m_Specs; }
 
+		void ToggleMouseLocking(bool toggle);
+
 	private:
 		void SetCallbacks();
 

@@ -11,11 +11,13 @@ namespace Banana
 		glm::mat4 GetViewMatrix(glm::vec3 pos);
 		void UpdateCameraVectors();
 
-		// glm::vec3 Pos;
+		glm::vec3 GetFrontVector() { return m_Front; }
+		glm::vec3 GetRightVector() { return m_Right; }
+		glm::vec3 GetUpVector() { return m_Up; }
+
 		float Yaw;
 		float Pitch;
 		float Roll;
-
 
 	private:
 		glm::vec3 m_Front;

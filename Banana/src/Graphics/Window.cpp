@@ -97,6 +97,14 @@ namespace Banana
 		return glfwGetMouseButton(m_Window, mouseButton);
 	}
 
+	void Window::ToggleMouseLocking(bool toggle)
+	{
+		if (toggle)
+			glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		else
+			glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
 	void Window::SetCallbacks()
 	{
 		// Window callbacks

@@ -7,7 +7,7 @@
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <ThirdPersonCameraController.h>
+#include <OrbitingCamera.h>
 
 using namespace Banana;
 
@@ -17,6 +17,7 @@ public:
 	ExampleScene()
 	{
 		Application::Get()->GetRenderer()->SetProjection(45.0f, 1280.0f / 720.0f, 0.1f, 100.0f);
+		Application::Get()->GetWindow()->ToggleMouseLocking(true);
 
 		m_PhysicsWorld = CreateRef<PhysicsWorld>();
 		RigidBody sphereRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Dynamic);
@@ -40,46 +41,43 @@ public:
 		modelScript.OnUpdate = [&](Entity ent, double timestep)
 		{
 			auto& physics = ent.GetComponent<PhysicsComponent>();
+
+			Entity cam = GetEntityByTag("Camera");
+			auto& camController = cam.GetComponent<OrbitingCamera>();
+			auto& camCam = cam.GetComponent<CameraComponent>();
+
 			glm::vec3 velocity = physics.RigidBody.GetVelocity();
 			float speed = 3.0f;
 			float maxSpeed = 5.0f;
 		
+			// Adding velocity
 			if (m_KeysDown.Up)
-			{
-				if (velocity.z > -maxSpeed)
-					physics.RigidBody.AddVelocity(glm::vec3(0.0f, 0.0f, -5.0f));
-				else
-					physics.RigidBody.SetVelocity(glm::vec3(velocity.x, velocity.y, -maxSpeed));
-			}
+				physics.RigidBody.AddVelocity(glm::vec3(camCam.Cam->GetFrontVector().x * speed, 0.0f, camCam.Cam->GetFrontVector().z * speed));
 			if (m_KeysDown.Down)
-			{
-				if (velocity.z < maxSpeed)
-					physics.RigidBody.AddVelocity(glm::vec3(0.0f, 0.0f, 5.0f));
-				else
-					physics.RigidBody.SetVelocity(glm::vec3(velocity.x, velocity.y, maxSpeed));
-			}
+				physics.RigidBody.AddVelocity(-glm::vec3(camCam.Cam->GetFrontVector().x * speed, 0.0f, camCam.Cam->GetFrontVector().z * speed));
 			if (m_KeysDown.Right)
-			{
-				if (velocity.x < maxSpeed)
-					physics.RigidBody.AddVelocity(glm::vec3(5.0f, 0.0f, 0.0f));
-				else
-					physics.RigidBody.SetVelocity(glm::vec3(maxSpeed, velocity.y, velocity.z));
-			}
+				physics.RigidBody.AddVelocity(glm::vec3(camCam.Cam->GetRightVector().x * speed, 0.0f, camCam.Cam->GetRightVector().z * speed));
 			if (m_KeysDown.Left)
-			{
-				if (velocity.x > -maxSpeed)
-					physics.RigidBody.AddVelocity(glm::vec3(-5.0f, 0.0f, 0.0f));
-				else
-					physics.RigidBody.SetVelocity(glm::vec3(-maxSpeed, velocity.y, velocity.z));
-			}
+				physics.RigidBody.AddVelocity(-glm::vec3(camCam.Cam->GetRightVector().x * speed, 0.0f, camCam.Cam->GetRightVector().z * speed));
 			if (m_KeysDown.Space)
-			{
-				if (velocity.y < maxSpeed)
-					physics.RigidBody.AddVelocity(glm::vec3(0.0f, 5.0f, 0.0f));
-				else
-					physics.RigidBody.SetVelocity(glm::vec3(velocity.x, maxSpeed, velocity.z));
-			}
+				physics.RigidBody.AddVelocity(glm::vec3(0.0f, speed, 0.0f));
+
+			velocity = physics.RigidBody.GetVelocity();
 		
+			// Capping velovity
+			if (velocity.x > maxSpeed)
+				velocity.x = maxSpeed;
+			if (velocity.x < -maxSpeed)
+				velocity.x = -maxSpeed;
+			if (velocity.y > maxSpeed)
+				velocity.y = maxSpeed;
+			if (velocity.y < -maxSpeed)
+				velocity.y = -maxSpeed;
+			if (velocity.z > maxSpeed)
+				velocity.z = maxSpeed;
+			if (velocity.z < -maxSpeed)
+				velocity.z = -maxSpeed;
+			physics.RigidBody.SetVelocity(velocity);
 		};
 
 		m_Plane = CreateEntity();
@@ -90,23 +88,29 @@ public:
 		m_Plane.AddComponent<PhysicsComponent>(planeRigidBody);
 
 		m_Camera = CreateEntity("Camera");
-		auto& camTransform = m_Camera.AddComponent<TransformComponent>();
-		camTransform.Translation = glm::vec3(0.0f, 0.0f, 20.0f);
+		m_Camera.AddComponent<TransformComponent>();
 		m_Camera.AddComponent<CameraComponent>(CreateRef<Camera>());
-		m_Camera.AddComponent<ThirdPersonCameraController>();
+		auto& camController = m_Camera.AddComponent<OrbitingCamera>();
 		auto& camImGui = m_Camera.AddComponent<ImGuiComponent>();
 		camImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
 		{
 			auto& transform = ent.GetComponent<TransformComponent>();
 			auto& cam = ent.GetComponent<CameraComponent>();
+			auto& camController = ent.GetComponent<OrbitingCamera>();
 			bool updateCamera = false;
 
+			float radius = camController.GetRadius();
+
 			ImGui::Begin("Camera");
+			ImGui::DragFloat("Sensitivity", &m_CamSensitivity, 0.1f);
+			ImGui::DragFloat("Radius", &radius, 0.1f);
 			ImGui::DragFloat3("Position", glm::value_ptr(transform.Translation), 0.1f);
 			updateCamera |= ImGui::DragFloat("Yaw", &cam.Cam->Yaw, 0.1f);
 			updateCamera |= ImGui::DragFloat("Pitch", &cam.Cam->Pitch, 0.1f);
 			updateCamera |= ImGui::DragFloat("Roll", &cam.Cam->Roll, 0.1f);
 			ImGui::End();
+
+			camController.SetRadius(radius);
 
 			if (updateCamera)
 				cam.Cam->UpdateCameraVectors();
@@ -115,25 +119,25 @@ public:
 		camScript.OnUpdate = [&](Entity ent, double timestep)
 		{
 			auto& camTransform = ent.GetComponent<TransformComponent>();
-			auto& camController = ent.GetComponent<ThirdPersonCameraController>();
+			auto& camController = ent.GetComponent<OrbitingCamera>();
 			auto& camCam = ent.GetComponent<CameraComponent>();
 
 			Entity model = GetEntityByTag("Model");
 			auto& modelTransform = model.GetComponent<TransformComponent>();
 
-			float horizontalDistance = camController.DistanceFromPlayer * glm::cos(camController.Pitch);
-			float verticalDistance = camController.DistanceFromPlayer * glm::sin(camController.Pitch);
+			camController.SetCenter(modelTransform.Translation);
+			camController.RotateAzimuth(-m_MouseDeltaX * timestep);
+			camController.RotatePolar(-m_MouseDeltaY * timestep);
 
-			float totalRotation = modelTransform.Rotation.y + camController.AngleAroundPlayer;
-			float offsetX = horizontalDistance * glm::sin(totalRotation);
-			float offsetZ = horizontalDistance * glm::cos(totalRotation);
+			camTransform.Translation = camController.GetPosCartesian();
 
-			camTransform.Translation.x = modelTransform.Translation.x - offsetX;
-			camTransform.Translation.y = modelTransform.Translation.y + verticalDistance;
-			camTransform.Translation.z = modelTransform.Translation.z - offsetZ;
+			camCam.Cam->Yaw = glm::degrees(camController.GetAzimuth());
+			camCam.Cam->Pitch = glm::degrees(camController.GetPolar()) -180.0f;
 
-			camCam.Cam->Pitch = camController.Pitch;
-			camCam.Cam->Yaw = modelTransform.Rotation.y + camController.AngleAroundPlayer;
+			m_MouseDeltaX = 0.0f;
+			m_MouseDeltaY = 0.0f;
+
+			camCam.Cam->UpdateCameraVectors();
 		};
 
 		m_Light = CreateEntity();
@@ -153,6 +157,7 @@ public:
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResized);
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnKeyDown);
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnKeyUp);
+		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnMouseMoved);
 	}
 
 private:
@@ -172,6 +177,8 @@ private:
 			m_KeysDown.Left = true;
 		if (event->Keycode == BANANA_KEY_SPACE)
 			m_KeysDown.Space = true;
+		if (event->Keycode == BANANA_KEY_ESCAPE)
+			Application::Get()->Stop();
 	}
 	void OnKeyUp(KeyUpEvent* event)
 	{
@@ -185,6 +192,22 @@ private:
 			m_KeysDown.Left = false;
 		if (event->Keycode == BANANA_KEY_SPACE)
 			m_KeysDown.Space = false;
+	}
+	void OnMouseMoved(MouseMovedEvent* event)
+	{
+		if (m_FirstMouse)
+		{
+			m_LastMouseX = event->x;
+			m_LastMouseY = event->y;
+			m_FirstMouse = false;
+			return;
+		}
+
+		m_MouseDeltaX = event->x - m_LastMouseX;
+		m_MouseDeltaY = event->y - m_LastMouseY;
+
+		m_LastMouseX = event->x;
+		m_LastMouseY = event->y;
 	}
 
 private:
@@ -201,4 +224,10 @@ private:
 		bool Left = false;
 		bool Space = false;
 	} m_KeysDown;
+
+	bool m_FirstMouse = true;
+	float m_LastMouseX = 0.0f, m_LastMouseY = 0.0f;
+	float m_MouseDeltaX = 0.0f, m_MouseDeltaY = 0.0f;
+
+	float m_CamSensitivity = 1.0f;
 };

@@ -28,8 +28,10 @@ namespace Banana
 		EventBus* GetEventBus() { return &m_EventBus; }
 		ScenePool* GetScenePool() { return &m_ScenePool; }
 		WindowSpecs GetWindowSpecs() { return m_Window.GetSpecs(); }
+		Window* GetWindow() { return &m_Window; }
 	
 		void Run();
+		void Stop();
 
 		void SetCurrentScene(Ref<Scene> scene);
 

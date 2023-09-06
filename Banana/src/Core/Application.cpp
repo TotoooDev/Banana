@@ -56,6 +56,11 @@ namespace Banana
 		}
 	}
 
+	void Application::Stop()
+	{
+		m_IsRunning = false;
+	}
+
 	void Application::SetCurrentScene(Ref<Scene> scene)
 	{
 		if (m_CurrentScene)
