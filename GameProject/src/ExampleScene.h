@@ -38,7 +38,7 @@ public:
 		m_Model.AddComponent<MaterialComponent>(bananaMaterials);
 		m_Model.AddComponent<PhysicsComponent>(sphereRigidBody);
 		auto& modelScript = m_Model.AddComponent<ScriptableComponent>();
-		modelScript.OnUpdate = [&](Entity ent, double timestep)
+		modelScript.OnUpdate = [&](Entity ent, Scene* scene, double timestep)
 		{
 			auto& physics = ent.GetComponent<PhysicsComponent>();
 
@@ -91,32 +91,8 @@ public:
 		m_Camera.AddComponent<TransformComponent>();
 		m_Camera.AddComponent<CameraComponent>(CreateRef<Camera>());
 		auto& camController = m_Camera.AddComponent<OrbitingCamera>();
-		auto& camImGui = m_Camera.AddComponent<ImGuiComponent>();
-		camImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)
-		{
-			auto& transform = ent.GetComponent<TransformComponent>();
-			auto& cam = ent.GetComponent<CameraComponent>();
-			auto& camController = ent.GetComponent<OrbitingCamera>();
-			bool updateCamera = false;
-
-			float radius = camController.GetRadius();
-
-			ImGui::Begin("Camera");
-			ImGui::DragFloat("Sensitivity", &m_CamSensitivity, 0.1f);
-			ImGui::DragFloat("Radius", &radius, 0.1f);
-			ImGui::DragFloat3("Position", glm::value_ptr(transform.Translation), 0.1f);
-			updateCamera |= ImGui::DragFloat("Yaw", &cam.Cam->Yaw, 0.1f);
-			updateCamera |= ImGui::DragFloat("Pitch", &cam.Cam->Pitch, 0.1f);
-			updateCamera |= ImGui::DragFloat("Roll", &cam.Cam->Roll, 0.1f);
-			ImGui::End();
-
-			camController.SetRadius(radius);
-
-			if (updateCamera)
-				cam.Cam->UpdateCameraVectors();
-		};
 		auto& camScript = m_Camera.AddComponent<ScriptableComponent>();
-		camScript.OnUpdate = [&](Entity ent, double timestep)
+		camScript.OnUpdate = [&](Entity ent, Scene* scene, double timestep)
 		{
 			auto& camTransform = ent.GetComponent<TransformComponent>();
 			auto& camController = ent.GetComponent<OrbitingCamera>();
@@ -142,7 +118,7 @@ public:
 
 		m_Light = CreateEntity();
 		auto& lightTransform = m_Light.AddComponent<TransformComponent>();
-		lightTransform.Rotation = glm::vec3(1.0f, -1.0f, 1.0f);
+		lightTransform.Rotation = glm::vec3(0.5f, -1.0f, 0.5f);
 		m_Light.AddComponent<DirectionalLightComponent>();
 		auto& lightImGui = m_Light.AddComponent<ImGuiComponent>();
 		lightImGui.OnDraw = [&](Entity ent, bool* isOpen, double timestep)

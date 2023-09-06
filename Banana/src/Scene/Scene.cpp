@@ -13,7 +13,7 @@ namespace Banana
 		for (auto&& [entity, script] : m_Registry.view<ScriptableComponent>().each())
 		{
 			auto ent = Entity(entity, this);
-			script.OnEnd(ent);
+			script.OnEnd(ent, this);
 		}
 		OnDelete();
 	}
@@ -31,7 +31,7 @@ namespace Banana
 	{
 		BANANA_ASSERT(entity.IsValid(), "Entity is not valid!");
 		if (entity.HasComponent<ScriptableComponent>())
-			entity.GetComponent<ScriptableComponent>().OnEnd(entity);
+			entity.GetComponent<ScriptableComponent>().OnEnd(entity, this);
 		m_Registry.destroy(entity.m_Identifier);
 	}
 
@@ -63,11 +63,11 @@ namespace Banana
 			if (!script.HasStarted)
 			{
 				if (script.OnStart)
-					script.OnStart(ent);
+					script.OnStart(ent, this);
 				script.HasStarted = true;
 			}
 			if (script.OnUpdate)
-				script.OnUpdate(ent, timestep);
+				script.OnUpdate(ent, this, timestep);
 		}
 	}
 

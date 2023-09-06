@@ -158,9 +158,9 @@ namespace Banana
 	// Scripts
 	struct ScriptableComponent
 	{
-		std::function<void(Entity)> OnStart;
-		std::function<void(Entity, double)> OnUpdate;
-		std::function<void(Entity)> OnEnd;
+		std::function<void(Entity, Scene*)> OnStart;
+		std::function<void(Entity, Scene*, double)> OnUpdate;
+		std::function<void(Entity, Scene*)> OnEnd;
 
 		bool HasStarted = false;
 
