@@ -12,7 +12,11 @@ class ThirdPersonCameraComponent
 public:
 	ThirdPersonCameraComponent(Entity ent, Scene* scene)
 	{
+		RigidBody rigidBody = scene->GetPhysicsWorld()->CreateRigidBody(RigidBodyType::Kinematic);
+		Collider sphereCollider = rigidBody.AddSphereCollider(1.0f);
+
 		ent.AddComponent<TransformComponent>();
+		ent.AddComponent<PhysicsComponent>(rigidBody);
 		ent.AddComponent<CameraComponent>(CreateRef<Camera>());
 		auto& camController = ent.AddComponent<OrbitingCamera>();
 		camController.SetRadius(20.0f);
@@ -22,6 +26,7 @@ public:
 			auto& camTransform = ent.GetComponent<TransformComponent>();
 			auto& camController = ent.GetComponent<OrbitingCamera>();
 			auto& camCam = ent.GetComponent<CameraComponent>();
+			auto& camPhysics = ent.GetComponent<PhysicsComponent>();
 
 			Entity model = scene->GetEntityByTag("Model");
 			auto& modelTransform = model.GetComponent<TransformComponent>();

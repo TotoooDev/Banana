@@ -43,6 +43,12 @@ namespace Banana
 		return Collider(collider);
 	}
 
+	void RigidBody::SetPosition(glm::vec3 pos)
+	{
+		rp3d::Transform transform(RP3DVec3(pos), m_RigidBody->getTransform().getOrientation());
+		m_RigidBody->setTransform(transform);
+	}
+
 	void RigidBody::SetMass(float mass)
 	{
 		m_RigidBody->setMass(mass);

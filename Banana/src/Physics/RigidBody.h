@@ -22,6 +22,8 @@ namespace Banana
 		Collider AddSphereCollider(float radius, glm::vec3 relativePos = glm::vec3(0.0f));
 		Collider AddBoxCollider(glm::vec3 halfExtents, glm::vec3 relativePos = glm::vec3(0.0f), glm::vec3 relativeRotation = glm::vec3(0.0f));
 		Collider AddCapsuleCollider(float radius, float height, glm::vec3 relativePos = glm::vec3(0.0f), glm::vec3 relativeRotation = glm::vec3(0.0f));
+
+		void SetPosition(glm::vec3 pos);
 		void SetMass(float mass);
 		void SetTakesGravity(bool takesGravity);
 		void AddVelocity(glm::vec3 velocity);
