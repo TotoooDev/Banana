@@ -19,6 +19,7 @@ namespace Banana
 		void DeleteEntity(Entity entity);
 
 		Entity GetEntityByTag(const std::string& tag); // Just a for loop over all the tag components so it *might* be a little bit slow :)
+		Ref<PhysicsWorld> GetPhysicsWorld() { return m_PhysicsWorld; }
 
 		void UpdateScene(Ref<RendererAPI> renderer, double timestep);
 		virtual void OnSetAsCurrent() {}
