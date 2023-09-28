@@ -69,6 +69,14 @@ project "Banana"
 		staticruntime "off"
 		systemversion "latest"
 		libdirs ("libs/linux")
+        links
+        {
+            "GL",
+            "GLEW",
+            "glfw",
+            "reactphysics3d",
+            "assimp"
+        }
 
 	-- If the project is generated with the Debug configuration it will apply these rules
 	filter "configurations:Debug"
@@ -118,14 +126,23 @@ project "GameProject"
 		runtime "Release"
 		systemversion "latest"
 		libdirs ("libs/windows")
-		-- links ()
-		postbuildcommands ("xcopy ..\\libs\\windows\\dlls\\ ..\\bin\\" .. outputDir .. "\\%{prj.name}\\ /s /e /y /i")
+		-- links()
+        postbuildcommands ("xcopy ..\\libs\\windows\\dlls\\ ..\\bin\\" .. outputDir .. "\\%{prj.name}\\ /s /e /y /i")
 		postbuildcommands ("xcopy ..\\dev-assets\\ ..\\bin\\" .. outputDir .. "\\%{prj.name}\\ /s /e /y /i")
 
 	filter "system:linux"
 		staticruntime "off"
 		systemversion "latest"
 		libdirs ("libs/linux")
+        links
+        {
+            "GL",
+            "GLEW",
+            "glfw",
+            "reactphysics3d",
+            "assimp"
+        }
+        postbuildcommands ("cp -R ../dev-assets/* ../bin/" .. outputDir .. "/%{prj.name}/")
 
 	filter "configurations:Debug"
 		defines
