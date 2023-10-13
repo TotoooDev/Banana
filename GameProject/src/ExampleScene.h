@@ -11,6 +11,8 @@
 #include <BananaComponent.h>
 #include <ThirdPersonCameraComponent.h>
 
+#include <Lua/Script.h>
+
 using namespace Banana;
 
 class ExampleScene : public Scene
@@ -18,6 +20,11 @@ class ExampleScene : public Scene
 public:
 	ExampleScene()
 	{
+		Script script("scripts/script.lua");
+		script.Run();
+		BANANA_INFO("value: {}", script.GetNumber("value"));
+		BANANA_INFO("other_value: {}", script.GetNumber("other_value"));
+
 		Application::Get()->GetRenderer()->SetProjection(45.0f, 1280.0f / 720.0f, 0.1f, 100.0f);
 		Application::Get()->GetWindow()->ToggleMouseLocking(true);
 
