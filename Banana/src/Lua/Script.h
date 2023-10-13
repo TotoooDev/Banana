@@ -8,7 +8,7 @@ namespace Banana
 	class Script
 	{
 	public:
-		Script(const std::string& path);
+		Script(const std::string& path, const std::string& name = "Unnamed Script");
 		~Script();
 
 		void Run();
@@ -17,5 +17,6 @@ namespace Banana
 
 	private:
 		lua_State* m_State;
+		std::string m_Name;
 	};
 }

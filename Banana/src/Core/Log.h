@@ -2,7 +2,8 @@
 #include <spdlog/spdlog.h>
 #include <cstdlib>
 
-// Simple log and assert macros
+// Preprocessor hell, part 1
+// The logging macros are disabled when compiling in release mode.
 
 #ifdef BANANA_DEBUG
 	#define BANANA_INFO(msg, ...)  spdlog::info((msg), ##__VA_ARGS__)

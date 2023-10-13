@@ -1,6 +1,6 @@
 #pragma once
 
-// From glfw3.h
+// define hell
 
 /* The unknown key */
 #define BANANA_KEY_UNKNOWN            -1

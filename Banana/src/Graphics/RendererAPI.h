@@ -16,9 +16,17 @@ namespace Banana
 		Vulkan
 	};
 
+	/**
+	 * @brief An API for the renderer. You can define the renderer specification in the Core/Config.h file. Note that Vulkan is not supported yet.
+	 *        You can create a RendererAPI using the RendererAPI::Create method but it's kinda useless.
+	 */
 	class RendererAPI
 	{
 	public:
+		/**
+		 * @brief Creates a RendererAPI using the API passed in parameter.
+		 * @param api - The API
+		 */
 		static Ref<RendererAPI> Create(RendererAPIName api);
 		static RendererAPIName GetAPI() { return m_API; }
 
@@ -35,6 +43,7 @@ namespace Banana
 		void Draw(Ref<Model> model, std::vector<Material> materials, glm::mat4 transform);
 
 		// Platform specific methods
+	public:
 		virtual void SetViewport(int x, int y, int width, int height) = 0;
 		virtual void Clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f) = 0;
 		virtual void RenderScene() = 0;

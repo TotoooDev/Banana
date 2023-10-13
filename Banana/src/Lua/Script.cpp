@@ -4,7 +4,8 @@
 
 namespace Banana
 {
-	Script::Script(const std::string& path)
+	Script::Script(const std::string& path, const std::string& name)
+		: m_Name(name)
 	{
 		// Create the Lua state and open the standard libraries
 		BANANA_LUA_INFO("Creating lua state...");
