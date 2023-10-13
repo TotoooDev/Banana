@@ -12,7 +12,7 @@ The reason why there is no editor (and probably will never be) is that I didn't 
 
 ### Build Banana
 
-Banana uses [Premake](https://premake.github.io/) as its configuration builder. At this point in time I was too lazy to add Linux support so good luck with that penguin users.
+Banana uses [Premake](https://premake.github.io/) as its configuration builder.
 
 1. First, download the source code.
 2. Then, depending on you OS, run the `GenerateProjects` script (the `.bat` one on Windows or the `.sh` one on Linux). This will either create a Visual Studio solution file or a Makefile depending on you OS.
