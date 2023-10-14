@@ -1,11 +1,17 @@
 #include <Lua/Log.h>
 #include <Lua/Script.h>
 #include <lua/lua.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace Banana
 {
-	Script::Script(const std::string& path, const std::string& name)
-		: m_Name(name)
+	void Script::Init()
+	{
+		auto log = spdlog::stdout_color_mt("lua");
+		log->set_pattern("[%D %T] %^[%l] [LUA]%$ %v");
+	}
+
+	Script::Script(const std::string& path)
 	{
 		// Create the Lua state and open the standard libraries
 		BANANA_LUA_INFO("Creating lua state...");
@@ -20,6 +26,9 @@ namespace Banana
 		int ret = luaL_loadfile(m_State, path.c_str());
 		if (ret != LUA_OK)
 			BANANA_LUA_ERROR("Failed to load {}!", path);
+
+		lua_pushcfunction(m_State, lua_log);
+		lua_setglobal(m_State, "Banana_Info");
 	}
 	
 	Script::~Script()
@@ -42,5 +51,12 @@ namespace Banana
 		if (!lua_isnumber(m_State, -1))
 			BANANA_LUA_ERROR("{} should be a number!", name);
 		return lua_tonumber(m_State, -1);
+	}
+
+	int Script::lua_log(lua_State* L)
+	{
+		const char* str = lua_tostring(L, 1);
+		BANANA_LUA_INFO(str);
+		return 0;
 	}
 }

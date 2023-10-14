@@ -1,8 +1,9 @@
-#include <Core/Log.h>
+#include <Graphics/Log.h>
 #include <Graphics/RendererAPI.h>
 #include <Graphics/OpenGL/OpenGLRendererAPI.h>
 #include <Core/Application.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace Banana
 {
@@ -23,6 +24,12 @@ namespace Banana
 		}
 
 		return nullptr;
+	}
+
+	void RendererAPI::InitLog()
+	{
+		auto log = spdlog::stdout_color_mt("renderer");
+		log->set_pattern("[%D %T] %^[%l] [RENDERER]%$ %v");
 	}
 
 	void RendererAPI::SetProjection(float fov, float aspectRatio, float nearPlane, float farPlane)

@@ -1,4 +1,4 @@
-#include <Core/Log.h>
+#include <Graphics/Log.h>
 #include <Graphics/OpenGL/OpenGLFramebuffer.h>
 #include <GL/glew.h>
 
@@ -69,7 +69,7 @@ namespace Banana
 		glDrawBuffers(attachments.size(), attachments.data());
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			BANANA_ERROR("Framebuffer is not complete!");
+			BANANA_RENDERER_ERROR("Framebuffer is not complete!");
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -78,7 +78,7 @@ namespace Banana
 	{
 		if (!m_Specs.Resizable)
 		{
-			BANANA_WARN("Attempting to resize unresizable framebuffer!");
+			BANANA_RENDERER_WARN("Attempting to resize unresizable framebuffer!");
 			return;
 		}
 		m_Specs.Width = width;

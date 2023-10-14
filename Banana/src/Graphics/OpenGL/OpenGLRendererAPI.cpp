@@ -1,6 +1,6 @@
-#include <Core/Log.h>
-#include <Graphics/OpenGL/OpenGLRendererAPI.h>
 #include <Core/Application.h>
+#include <Graphics/Log.h>
+#include <Graphics/OpenGL/OpenGLRendererAPI.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Banana
@@ -211,10 +211,10 @@ namespace Banana
 
 					switch (severity)
 					{
-					case GL_DEBUG_SEVERITY_HIGH:         BANANA_ERROR(sstream.str()); break;
-					case GL_DEBUG_SEVERITY_MEDIUM:       BANANA_WARN(sstream.str()); break;
-					case GL_DEBUG_SEVERITY_LOW:          BANANA_WARN(sstream.str()); break;
-					case GL_DEBUG_SEVERITY_NOTIFICATION: BANANA_INFO(sstream.str()); break;
+					case GL_DEBUG_SEVERITY_HIGH:         BANANA_RENDERER_ERROR(sstream.str()); break;
+					case GL_DEBUG_SEVERITY_MEDIUM:       BANANA_RENDERER_WARN(sstream.str()); break;
+					case GL_DEBUG_SEVERITY_LOW:          BANANA_RENDERER_WARN(sstream.str()); break;
+					case GL_DEBUG_SEVERITY_NOTIFICATION: BANANA_RENDERER_INFO(sstream.str()); break;
 					}
 				}, nullptr);
 
@@ -222,7 +222,7 @@ namespace Banana
 		}
 		else
 		{
-			BANANA_ERROR("Unable to create a debug context!");
+			BANANA_RENDERER_ERROR("Unable to create a debug context!");
 		}
 	}
 	#endif

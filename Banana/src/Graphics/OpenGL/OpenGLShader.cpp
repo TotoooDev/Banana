@@ -1,4 +1,4 @@
-#include <Core/Log.h>
+#include <Graphics/Log.h>
 #include <Graphics/OpenGL/OpenGLShader.h>
 #include <GL/glew.h>
 #include <fstream>
@@ -16,12 +16,12 @@ namespace Banana
 
         if (!vertexFile.good())
         {
-            BANANA_ERROR("File {} does not exist!", m_VertexPath);
+            BANANA_RENDERER_ERROR("File {} does not exist!", m_VertexPath);
             return;
         }
         if (!fragmentFile.good())
         {
-            BANANA_ERROR("File {} does not exist!", m_FragmentPath);
+            BANANA_RENDERER_ERROR("File {} does not exist!", m_FragmentPath);
             return;
         }
 
@@ -36,9 +36,9 @@ namespace Banana
     void OpenGLShader::CreateFromString(const std::string& vertexSource, const std::string& fragmentSource)
     {
         if (vertexSource.empty())
-            BANANA_WARN("Vertex shader is empty!");
+            BANANA_RENDERER_WARN("Vertex shader is empty!");
         if (fragmentSource.empty())
-            BANANA_WARN("Fragment shader is empty!");
+            BANANA_RENDERER_WARN("Fragment shader is empty!");
 
         const char* vertexSrc = vertexSource.c_str();
         const char* fragmentSrc = fragmentSource.c_str();
@@ -47,7 +47,7 @@ namespace Banana
         int success;
         char infoLog[1024];
         // Vertex shader
-        BANANA_INFO("Compiling vertex shader {}", m_VertexPath);
+        BANANA_RENDERER_INFO("Compiling vertex shader {}", m_VertexPath);
         unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexSrc, nullptr);
         glCompileShader(vertexShader);
@@ -56,10 +56,10 @@ namespace Banana
         if (!success)
         {
             glGetShaderInfoLog(vertexShader, sizeof(infoLog), nullptr, infoLog);
-            BANANA_ERROR("Error compiling vertex shader! \n{}", infoLog);
+            BANANA_RENDERER_ERROR("Error compiling vertex shader! \n{}", infoLog);
         }
         // Fragment shader
-        BANANA_INFO("Compiling fragment shader {}", m_FragmentPath);
+        BANANA_RENDERER_INFO("Compiling fragment shader {}", m_FragmentPath);
         unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, 1, &fragmentSrc, nullptr);
         glCompileShader(fragmentShader);
@@ -68,7 +68,7 @@ namespace Banana
         if (!success)
         {
             glGetShaderInfoLog(fragmentShader, sizeof(infoLog), nullptr, infoLog);
-            BANANA_ERROR("Error compiling fragment shader! \n{}", infoLog);
+            BANANA_RENDERER_ERROR("Error compiling fragment shader! \n{}", infoLog);
         }
 
         // Shader program
@@ -81,7 +81,7 @@ namespace Banana
         if (!success)
         {
             glGetProgramInfoLog(m_ID, sizeof(infoLog), nullptr, infoLog);
-            BANANA_ERROR(infoLog);
+            BANANA_RENDERER_ERROR(infoLog);
         }
 
         // Delete shaders, we don't need them anymore

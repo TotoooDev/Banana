@@ -1,11 +1,10 @@
 #pragma once
-#include <Core/Log.h>
+#include <spdlog/spdlog.h>
 
-// I think there will be a lot of logging for Lua,
-// so implementing a different logging macro for Lua to differentiate easily between the messages is a good idea
+// Since the user might use these macros in release mode, they are always defined.
 
 // Preprocessor hell, part 2
 
-#define BANANA_LUA_INFO(msg, ...) BANANA_INFO("[LUA] " ## msg, ##__VA_ARGS__)
-#define BANANA_LUA_WARNING(msg, ...) BANANA_WARNING("[LUA] " ## msg, ##__VA_ARGS__)
-#define BANANA_LUA_ERROR(msg, ...) BANANA_ERROR("[LUA] " ## msg, ##__VA_ARGS__)
+#define BANANA_LUA_INFO(msg, ...) spdlog::get("lua")->info(msg, __VA_ARGS__)
+#define BANANA_LUA_WARNING(msg, ...) spdlog::get("lua")->warn(msg, __VA_ARGS__)
+#define BANANA_LUA_ERROR(msg, ...) spdlog::get("lua")->error(msg, __VA_ARGS__)

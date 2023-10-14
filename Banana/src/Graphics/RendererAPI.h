@@ -31,6 +31,11 @@ namespace Banana
 		static Ref<RendererAPI> Create(RendererAPIName api);
 
 		/**
+		 * @brief Initializes the logging pattern for the renderer.
+		 */
+		static void InitLog();
+
+		/**
 		 * @returns The rendererspecification in use.
 		 */
 		static RendererAPIName GetAPI() { return m_API; }

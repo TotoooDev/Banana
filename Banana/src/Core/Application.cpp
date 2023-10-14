@@ -22,9 +22,9 @@ namespace Banana
 
 		// spdlog setup
 		auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-		consoleSink->set_pattern("[%D %T] [%^%l%$] %v");
+		consoleSink->set_pattern("[%D %T] %^[%l]%$ %v");
 		auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("logs/banana.log", 1048576, 3);
-		fileSink->set_pattern("[%D %T] [%^%l%$] %v");
+		fileSink->set_pattern("[%D %T] %^[%l]%$ %v");
 		spdlog::logger logger("Default Logger", { consoleSink, fileSink });
 		spdlog::set_default_logger(std::make_shared<spdlog::logger>(logger));
 		BANANA_WARN("Booting up Banana!");
@@ -40,6 +40,7 @@ namespace Banana
 		#elif defined(BANANA_VULKAN)
 			api = RendererAPIName::Vulkan;
 		#endif
+		RendererAPI::InitLog();
 		m_Renderer = RendererAPI::Create(api);
 	}
 

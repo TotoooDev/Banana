@@ -20,6 +20,7 @@ class ExampleScene : public Scene
 public:
 	ExampleScene()
 	{
+		Script::Init();
 		Script script("scripts/script.lua");
 		script.Run();
 		BANANA_INFO("value: {}", script.GetNumber("value"));
