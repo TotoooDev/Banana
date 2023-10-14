@@ -37,9 +37,13 @@ namespace Banana
 
 	void RendererAPI::BeginScene(Ref<Camera> cam, glm::vec3 camPos)
 	{
-		m_ObjectsToDraw.clear();
-		m_NumLights = 0;
 		m_CurrentView = cam->GetViewMatrix(camPos);
+		
+		// Clear the draw list
+		m_ObjectsToDraw.clear();
+		
+		// Clear the light lists
+		m_NumLights = 0;
 		m_DirectionalLights.clear();
 		m_PointLights.clear();
 		m_SpotLights.clear();
