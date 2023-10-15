@@ -18,9 +18,6 @@ namespace Banana
 		double GetNumber(const std::string& name);
 
 	private:
-		static int lua_log(lua_State* L);
-
-	private:
 		lua_State* m_State;
 	};
 }
