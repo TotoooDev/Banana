@@ -1,7 +1,7 @@
-#include <Graphics/Window.h>
 #include <Core/Config.h>
 #include <Events/Events.h>
-#include <Core/Log.h>
+#include <Graphics/Window.h>
+#include <Graphics/Log.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>

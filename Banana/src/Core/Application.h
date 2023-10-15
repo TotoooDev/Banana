@@ -9,38 +9,107 @@
 
 namespace Banana
 {
-	// The application class contains everything related to the currently run application.
-	// An application needs to be created along with the `CreateApplication` function that returns a pointer to the application.
-	// Usually you will use it as a singleton with the `Get` method.
-	// It has a pointer to the current scene that should be updated, you can set it with the `SetCurrentScene` method
+	/**
+	 * @brief
+	 * The application class contains everything related to the currently run application.
+	 * An application needs to be created along with the `CreateApplication` function that returns a pointer to the application.
+	 * Usually you will use it as a singleton with the `Get` method.
+	 * It has a pointer to the current scene that should be updated, you can set it with the `SetCurrentScene` method
+	 */
 	class Application
 	{
 	public:
+		/**
+		 * @brief Creates a window, sets up the log for debugging (which is disabled in release mode), and creates a renderer.
+		 * @param specs - The windows specification that will be used to create the window
+		 */
 		Application(const WindowSpecs& specs);
 
+	public:
+		/**
+		 * @brief Runs the application! It runs until the WindowClosedEvent is published or the Stop() method is called.
+		 */
+		void Run();
+
+		/**
+		 * @brief Stops the application.
+		 */
+		void Stop();
+
+	// Getters
+	public:
+		/**
+		 * @brief Returns a pointer to the instance of the application.
+		 * @returns A pointer to the application
+		 */
+		static Application* Get() { return m_Instance; }
+
+		/**
+		 * @brief Returns the timestep, i.e. the time in seconds between frames. It is used to prevent different behaviors depending on framerate.
+		 * @returns The timestep in seconds
+		 */
+		float GetTimestep() { return m_Timestep; }
+
+		/**
+		 * @brief Returns a reference to the RendererAPI. Usually you won't need to interact with the RendererAPI directly, the scene manages drawing stuff for you.
+		 * @returns A reference to the RendererAPI
+		 */
+		Ref<RendererAPI> GetRenderer() { return m_Renderer; }
+
+		/**
+		 * @brief Returns a pointer to the window's event bus. Use it to subscribe to and publish events.
+		 * @returns A pointer to the event bus.
+		 */
+		EventBus* GetEventBus() { return &m_EventBus; }
+
+		/**
+		 * @returns A pointer to the scene pool
+		 */
+		ScenePool* GetScenePool() { return &m_ScenePool; }
+
+		/**
+		 * @brief Returns the window specifications. It gets updated every time you change the window's paramters.
+		 * @returns The window specifications.
+		 */
+		WindowSpecs GetWindowSpecs() { return m_Window.GetSpecs(); }
+
+		/**
+		 * @brief Returns a pointer to the window. For now you can only have one window in your application (and I don't really plan on adding multiple windows support lol)
+		 * @returns A pointer to the window.
+		 */
+		Window* GetWindow() { return &m_Window; }
+
+	// Setters
+	public:
+		/**
+		 * @brief Sets the scene that gets updated each frame.
+		 * @param scene - The scene that will be set as current
+		 */
+		void SetCurrentScene(Ref<Scene> scene);
+
+	// Operators
+	public:
 		// The application should not be clonable or assignable
 		Application(Application&) = delete;
 		void operator=(const Application&) = delete;
-	
-		static Application* Get() { return m_Instance; }
-		float GetTimestep() { return m_Timestep; }
-		Ref<RendererAPI> GetRenderer() { return m_Renderer; }
-		EventBus* GetEventBus() { return &m_EventBus; }
-		ScenePool* GetScenePool() { return &m_ScenePool; }
-		WindowSpecs GetWindowSpecs() { return m_Window.GetSpecs(); }
-		Window* GetWindow() { return &m_Window; }
-	
-		void Run();
-		void Stop();
-
-		void SetCurrentScene(Ref<Scene> scene);
 
 	private:
 		void UpdateTimestep();
+
+		/**
+		 * @brief Stops the application. Gets called when the WindowClosedEvent is published.
+		 */
 		void OnWindowClosedEvent(WindowClosedEvent* event);
+
+		/**
+		 * @brief Resizes the renderer viewport. Gets called when the WindowResized event is published.
+		 */
 		void OnWindowResizedEvent(WindowResizedEvent* event);
 
 	private:
+		/**
+		 * @brief A pointer to the unique instance of the application.
+		 */
 		static Application* m_Instance;
 
 		Window m_Window;

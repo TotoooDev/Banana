@@ -1,4 +1,4 @@
-#include <Core/Log.h>
+#include <Graphics/Log.h>
 #include <Graphics/VertexObjects.h>
 #include <Graphics/RendererAPI.h>
 #include <Graphics/OpenGL/OpenGLVertexObjects.h>

@@ -1,4 +1,4 @@
-#include <Core/Log.h>
+#include <Graphics/Log.h>
 #include <Graphics/Shader.h>
 #include <Graphics/RendererAPI.h>
 #include <Graphics/OpenGL/OpenGLShader.h>

@@ -1,4 +1,4 @@
-#include <Core/Log.h>
+#include <Graphics/Log.h>
 #include <Graphics/Texture.h>
 #include <Graphics/RendererAPI.h>
 #include <Graphics/OpenGL/OpenGLTexture.h>

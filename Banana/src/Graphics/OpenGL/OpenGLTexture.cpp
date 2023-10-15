@@ -1,4 +1,4 @@
-#include <Core/Log.h>
+#include <Graphics/Log.h>
 #include <Graphics/OpenGL/OpenGLTexture.h>
 #include <GL/glew.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -28,18 +28,18 @@ namespace Banana
 	{
 		if (path.empty())
 		{
-			BANANA_ERROR("Texture path is empty!");
+			BANANA_RENDERER_ERROR("Texture path is empty!");
 			return;
 		}
 
 		stbi_set_flip_vertically_on_load(flip);
 
-		BANANA_INFO("Loading image {}", path);
+		BANANA_RENDERER_INFO("Loading image {}", path);
 		int width, height, numChannels;
 		unsigned char* data = stbi_load(path.c_str(), &width, &height, &numChannels, 0);
 		if (!data)
 		{
-			BANANA_ERROR("Failed to load image {}!", path);
+			BANANA_RENDERER_ERROR("Failed to load image {}!", path);
 			stbi_image_free(data);
 			return;
 		}

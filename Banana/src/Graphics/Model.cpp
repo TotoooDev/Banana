@@ -1,4 +1,4 @@
-#include <Core/Log.h>
+#include <Graphics/Log.h>
 #include <Graphics/Model.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -8,12 +8,12 @@ namespace Banana
 	Model::Model(const std::string& path, bool flipTextures)
 		: m_Path(path), m_FlipTextures(flipTextures)
 	{
-		BANANA_INFO("Loading model {}", m_Path);
+		BANANA_RENDERER_INFO("Loading model {}", m_Path);
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(m_Path, aiProcess_Triangulate | aiProcess_GenNormals);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
-			BANANA_ERROR("Failed to load {0}! Assimp error: {1}", m_Path, importer.GetErrorString());
+			BANANA_RENDERER_ERROR("Failed to load {0}! Assimp error: {1}", m_Path, importer.GetErrorString());
 			return;
 		}
 
@@ -22,12 +22,12 @@ namespace Banana
 
 	std::vector<Material> Model::LoadMaterials()
 	{
-		BANANA_INFO("Loading materials of model {}", m_Path);
+		BANANA_RENDERER_INFO("Loading materials of model {}", m_Path);
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(m_Path, m_FlipTextures ? aiProcess_FlipUVs : 0);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
-			BANANA_ERROR("Failed to load {0}! Assimp error: {1}", m_Path, importer.GetErrorString());
+			BANANA_RENDERER_ERROR("Failed to load {0}! Assimp error: {1}", m_Path, importer.GetErrorString());
 			return {};
 		}
 

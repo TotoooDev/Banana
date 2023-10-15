@@ -1,5 +1,5 @@
+#include <Graphics/Log.h>
 #include <Graphics/OpenGL/OpenGLVertexObjects.h>
-#include <Core/Log.h>
 
 namespace Banana
 {
@@ -81,7 +81,7 @@ namespace Banana
 	{
 		Attribute attribute = m_Layout.GetAttributes()[attributeIndex];
 		if (attribute.DataType != Type::Float)
-			BANANA_WARN("Trying to set data for wrong type!");
+			BANANA_RENDERER_WARN("Trying to set data for wrong type!");
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 		unsigned int offset = 0;
 		for (unsigned int i = 0; i < attributeIndex; i++)
@@ -92,7 +92,7 @@ namespace Banana
 	{
 		Attribute attribute = m_Layout.GetAttributes()[attributeIndex];
 		if (attribute.DataType != Type::Vec2)
-			BANANA_WARN("Trying to set data for wrong type!");
+			BANANA_RENDERER_WARN("Trying to set data for wrong type!");
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 		unsigned int offset = 0;
 		for (unsigned int i = 0; i < attributeIndex; i++)
@@ -103,7 +103,7 @@ namespace Banana
 	{
 		Attribute attribute = m_Layout.GetAttributes()[attributeIndex];
 		if (attribute.DataType != Type::Vec3)
-			BANANA_WARN("Trying to set data for wrong type!");
+			BANANA_RENDERER_WARN("Trying to set data for wrong type!");
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 		unsigned int offset = 0;
 		for (unsigned int i = 0; i < attributeIndex; i++)
@@ -114,7 +114,7 @@ namespace Banana
 	{
 		Attribute attribute = m_Layout.GetAttributes()[attributeIndex];
 		if (attribute.DataType != Type::Vec4)
-			BANANA_WARN("Trying to set data for wrong type!");
+			BANANA_RENDERER_WARN("Trying to set data for wrong type!");
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 		unsigned int offset = 0;
 		for (unsigned int i = 0; i < attributeIndex; i++)
@@ -125,7 +125,7 @@ namespace Banana
 	{
 		Attribute attribute = m_Layout.GetAttributes()[attributeIndex];
 		if (attribute.DataType != Type::Mat4)
-			BANANA_WARN("Trying to set data for wrong type!");
+			BANANA_RENDERER_WARN("Trying to set data for wrong type!");
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 		unsigned int offset = 0;
 		for (unsigned int i = 0; i < attributeIndex; i++)
@@ -135,23 +135,23 @@ namespace Banana
 
 	void OpenGLVAO::SetDataInstance(unsigned int attributeIndex, std::vector<float> data)
 	{
-		BANANA_WARN("I'm too lazy to implement this yet");
+		BANANA_RENDERER_WARN("I'm too lazy to implement this yet");
 	}
 	void OpenGLVAO::SetDataInstance(unsigned int attributeIndex, std::vector<glm::vec2> data)
 	{
-		BANANA_WARN("I'm too lazy to implement this yet");
+		BANANA_RENDERER_WARN("I'm too lazy to implement this yet");
 	}
 	void OpenGLVAO::SetDataInstance(unsigned int attributeIndex, std::vector<glm::vec3> data)
 	{
-		BANANA_WARN("I'm too lazy to implement this yet");
+		BANANA_RENDERER_WARN("I'm too lazy to implement this yet");
 	}
 	void OpenGLVAO::SetDataInstance(unsigned int attributeIndex, std::vector<glm::vec4> data)
 	{
-		BANANA_WARN("I'm too lazy to implement this yet");
+		BANANA_RENDERER_WARN("I'm too lazy to implement this yet");
 	}
 	void OpenGLVAO::SetDataInstance(unsigned int attributeIndex, std::vector<glm::mat4> data)
 	{
-		BANANA_WARN("I'm too lazy to implement this yet");
+		BANANA_RENDERER_WARN("I'm too lazy to implement this yet");
 	}
 
 	void OpenGLVAO::Bind()

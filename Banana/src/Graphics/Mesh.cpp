@@ -1,4 +1,3 @@
-#include <Core/Log.h>
 #include <Graphics/Mesh.h>
 
 namespace Banana
