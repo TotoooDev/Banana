@@ -11,6 +11,9 @@ namespace Banana
 	public:
 		static Ref<Shader> Create(const std::string& vertexPath, const std::string& fragmentPath);
 
+		std::string GetVertexPath() { return m_VertexPath; }
+		std::string GetFragmentPath() { return m_FragmentPath; }
+
 		virtual void Bind() = 0;
 		virtual void SetInt(int value, const std::string& name) = 0;
 		virtual void SetFloat(float value, const std::string& name) = 0;

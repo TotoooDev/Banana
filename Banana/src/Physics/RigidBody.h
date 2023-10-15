@@ -32,6 +32,7 @@ namespace Banana
 
 		void ApplyForce(glm::vec3 force);
 
+		RigidBodyType GetType() { return m_Type; }
 		glm::mat4 GetInterpolatedTransform() { return m_InterpolatedTransform; }
 		glm::mat4 GetTransform();
 		glm::vec3 GetPosition();
@@ -44,6 +45,8 @@ namespace Banana
 
 		rp3d::Transform m_PreviousTransform;
 		glm::mat4 m_InterpolatedTransform = glm::mat4(1.0f);
+
+		RigidBodyType m_Type;
 
 		friend class PhysicsWorld;
 	};

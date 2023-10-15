@@ -1,11 +1,8 @@
 #include <Core/Application.h>
-#include <Core/Timer.h>
 #include <Scene/Entity.h>
 #include <Scene/Components.h>
+#include <Scene/Parser.h>
 #include <Graphics/Primitives/Plane.h>
-#include <Graphics/Primitives/Icosphere.h>
-#include <imgui/imgui.h>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <OrbitingCamera.h>
 #include <BananaComponent.h>
@@ -42,6 +39,9 @@ public:
 		auto& lightTransform = m_Light.AddComponent<TransformComponent>();
 		lightTransform.Rotation = glm::vec3(0.5f, -1.0f, 0.5f);
 		m_Light.AddComponent<DirectionalLightComponent>();
+
+		Parser parser;
+		parser.ExportToJSON("scene.banana", this);
 
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResized);
 	}
