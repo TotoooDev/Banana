@@ -46,8 +46,8 @@ public:
 		lightTransform.Rotation = glm::vec3(0.5f, -1.0f, 0.5f);
 		m_Light.AddComponent<DirectionalLightComponent>();
 
-		Parser parser;
-		parser.ExportToJSON("scene.banana", this);
+		// Parser parser;
+		// parser.ExportToJSON("scene.banana", this);
 
 		Application::Get()->GetEventBus()->Subscribe(this, &ExampleScene::OnWindowResized);
 	}

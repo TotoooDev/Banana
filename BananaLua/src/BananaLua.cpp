@@ -23,16 +23,22 @@ extern "C"
 		{ nullptr, nullptr }
 	};
 
+	struct Foo
+	{
+		Foo(float bar, bool what, std::string how) : Bar(bar), What(what), How(how) { BANANA_LUA_INFO("Other constructor is called!"); }
+		int CoolMethod() { BANANA_LUA_INFO("Cool method!"); return 0; }
+		float Bar; bool What; std::string How;
+	};
+
 	BANANA_EXPORT int luaopen_Banana(lua_State* L)
 	{
 		// Set the logger
 		auto log = spdlog::stdout_color_mt("lua");
 		log->set_pattern("[%D %T] %^[%l] [LUA]%$ %v");
 
-		struct Foo { Foo() { BANANA_LUA_INFO("Constructor is called!"); } float Bar; bool What; std::string How; };
-
 		LuaClass<Foo> yipee(L, "Foo");
 		yipee.SetConstructor<float, bool, std::string>();
+		yipee.SetFunction("Bar", &Foo::CoolMethod);
 		
 		// Load the library into Lua
 		lua_newtable(L);
