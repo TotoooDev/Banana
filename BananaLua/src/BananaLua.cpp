@@ -5,6 +5,8 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
+#include <ArgumentTypes.h>
+
 #ifdef BANANA_WINDOWS
 	#define BANANA_EXPORT __declspec(dllexport)
 #else
@@ -25,8 +27,8 @@ extern "C"
 
 	struct Foo
 	{
-		Foo(float bar, bool what, std::string how) : Bar(bar), What(what), How(how) { BANANA_LUA_INFO("Other constructor is called!"); }
-		int CoolMethod() { BANANA_LUA_INFO("Cool method!"); return 0; }
+		Foo(float bar, bool what, std::string how) : Bar(bar), What(what), How(how) {}
+		float CoolMethod(int, float, std::string) { BANANA_LUA_INFO("Cool method!"); return 0.0f; }
 		float Bar; bool What; std::string How;
 	};
 
@@ -36,7 +38,7 @@ extern "C"
 		auto log = spdlog::stdout_color_mt("lua");
 		log->set_pattern("[%D %T] %^[%l] [LUA]%$ %v");
 
-		LuaClass<Foo> yipee(L, "Foo");
+		Banana::LuaClass<Foo> yipee(L, "Foo");
 		yipee.SetConstructor<float, bool, std::string>();
 		yipee.SetFunction("Bar", &Foo::CoolMethod);
 		

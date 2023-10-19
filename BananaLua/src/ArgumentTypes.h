@@ -1,50 +1,77 @@
 #pragma once
+#include <Concepts.h>
 #include <tuple>
 
-// From https://stackoverflow.com/a/70954691
-
-// Base Signature structure
-template <typename Sig>
-struct Signature;
-
-// Specialization for functions
-template <typename ReturnType, typename... Args>
-struct Signature<ReturnType(Args...)>
+namespace Banana
 {
-	using Type = std::tuple<Args...>;
-};
+	// Base SignatureArgTypes structure
+	template <typename Sig>
+	struct SignatureArgTypes;
 
-// Specialization for member functions
-template <typename ReturnType, typename Object, typename... Args>
-struct Signature<ReturnType(Object::*)(Args...) const>
-{
-	using Type = std::tuple<Args...>;
-};
+	// Specialization for functions
+	template <typename ReturnType, typename... Args>
+	struct SignatureArgTypes<ReturnType(Args...)>
+	{
+		using Type = std::tuple<Args...>;
+		static Type GetType() { return Type(); }
+	};
 
-// I don't understand what the fuck is going on here
-template <typename Function>
-concept IsFunction = std::is_function_v<Function>;
+	// Specialization for member functions
+	template <typename ReturnType, typename Object, typename... Args>
+	struct SignatureArgTypes<ReturnType(Object::*)(Args...)>
+	{
+		using Type = std::tuple<Args...>;
+		static Type GetType() { return Type(); }
+	};
 
-template <typename Function>
-concept IsMemberFunction = std::is_member_function_pointer_v<std::decay_t<Function>>;
-
-template <typename Function>
-concept IsFunctor = std::is_class_v<std::decay_t<Function>> && requires(Function && t)
-{
-	&std::decay_t<Function>::operator();
-};
-
-template <IsFunction T>
-auto GetArgumentTypes(const T& t) -> Signature<T>::Type;
-
-template <IsFunctor T>
-auto GetArgumentTypes(T&& t) -> Signature<decltype(&std::decay_t<T>::operator())>::Type;
-
-template <IsFunctor T>
-auto GetArgumentTypes(const T& t) -> Signature<decltype(&std::decay_t<T>::operator())>::Type;
-
-template <IsMemberFunction T>
-auto GetArgumentTypes(T&& t) -> Signature<std::decay_t<T>>::Type;
-
-template <IsMemberFunction T>
-auto GetArgumentTypes(const T& t) -> Signature<std::decay_t<T>>::Type;
+	/**
+	 * From https://stackoverflow.com/a/70954691
+	 * @returns A tuple of the types of the function passed in template parameter.
+	 * @param Func - The function to get the types from.
+	 */
+	template <IsFunction Func>
+	auto GetArgumentTypes(const Func& t) -> SignatureArgTypes<Func>::Type
+	{
+		return SignatureArgTypes<Func>::GetType();
+	}
+	/**
+	 * From https://stackoverflow.com/a/70954691
+	 * @returns A tuple of the types of the functor passed in template parameter.
+	 * @param Func - The functor to get the types from.
+	 */
+	template <IsFunctor Functor>
+	auto GetArgumentTypes(Functor&& t) -> SignatureArgTypes<decltype(&std::decay_t<Functor>::operator())>::Type
+	{
+		return SignatureArgTypes<decltype(&std::decay_t<Functor>::operator())>::GetType();
+	}
+	/**
+	 * From https://stackoverflow.com/a/70954691
+	 * @returns A tuple of the types of the functor passed in template parameter.
+	 * @param Func - The functor to get the types from.
+	 */
+	template <IsFunctor Functor>
+	auto GetArgumentTypes(const Functor& t) -> SignatureArgTypes<decltype(&std::decay_t<Functor>::operator())>::Type
+	{
+		return SignatureArgTypes<decltype(&std::decay_t<Functor>::operator())>::GetType();
+	}
+	/**
+	 * From https://stackoverflow.com/a/70954691
+	 * @returns A tuple of the types of the member function passed in template parameter.
+	 * @param Func - The member function to get the types from.
+	 */
+	template <IsMemberFunction MemberFunc>
+	auto GetArgumentTypes(MemberFunc&& t) -> SignatureArgTypes<std::decay_t<MemberFunc>>::Type
+	{
+		return SignatureArgTypes<std::decay_t<MemberFunc>>::GetType();
+	}
+	/**
+	 * From https://stackoverflow.com/a/70954691
+	 * @returns A tuple of the types of the member function passed in template parameter.
+	 * @param Func - The member function to get the types from.
+	 */
+	template <IsMemberFunction MemberFunc>
+	auto GetArgumentTypes(const MemberFunc& t) -> SignatureArgTypes<std::decay_t<MemberFunc>>::Type
+	{
+		return SignatureArgTypes<std::decay_t<MemberFunc>>::GetType();
+	}
+}
