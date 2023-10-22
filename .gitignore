@@ -374,3 +374,6 @@ Makefile
 .idea/
 # and the compile commands for YCM (vim is daddy)
 compile_commands.json
+# and the documentation stuff
+docs/html/
+docs/latex/

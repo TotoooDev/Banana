@@ -8,17 +8,17 @@
 namespace Banana
 {
 	/**
-	 * @brief A helper to bind a C++ class to Lua. In the docs I'll refer to the binding as the table-class (since in Lua it's just a table).
+	 * A helper to bind a C++ class to Lua. In the docs I'll refer to the binding as the table-class (since in Lua it's just a table).
 	 */
 	template <typename T>
 	class LuaClass
 	{
 	public:
 		/**
-		 * @brief Allocates memory for a table-class in Lua that you can use to perform cool operations. The table will be globally accessible to
-		 *        create new instances of your table-class using `foo = Foo.new()` in Lua.
-		 *        A default constructor will be created but note that it does not call C++ constructor! It just allocates memory.
-		 *        You can add your own constructors that will call the C++ constructor.
+		 * Allocates memory for a table-class in Lua that you can use to perform cool operations. The table will be globally accessible to
+		 * create new instances of your table-class using `foo = Foo.new()` in Lua.
+		 * A default constructor will be created but note that it does not call C++ constructor! It just allocates memory.
+		 * You can add your own constructors that will call the C++ constructor.
 		 * @param state - The Lua state where you want your table-class to be allocated.
 		 * @param name - The name of your global table-class.
 		 */
@@ -60,7 +60,7 @@ namespace Banana
 		}
 
 		/**
-		 * @brief Adds a function (method?) for the table-class.
+		 * Adds a function (method?) for the table-class.
 		 * @param name - The name of the function.
 		 * @param func - The function to call.
 		 */
