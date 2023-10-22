@@ -1,5 +1,7 @@
 # Banana 🍌
 
+![banana](docs/banana_big.png)
+
 Banana is a 3D game engine written with C++ and OpenGL.
 
 ## Get started
