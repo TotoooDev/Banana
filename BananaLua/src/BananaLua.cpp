@@ -28,7 +28,7 @@ extern "C"
 	struct Foo
 	{
 		Foo(float bar, bool what, std::string how) : Bar(bar), What(what), How(how) {}
-		float CoolMethod(int, float, std::string) { BANANA_LUA_INFO("Cool method!"); return 0.0f; }
+		float CoolMethod(bool b, float f, std::string s) { BANANA_LUA_INFO("{0} {1} {2}", b, f, s); return 0.0f; }
 		float Bar; bool What; std::string How;
 	};
 

@@ -5,6 +5,14 @@
 
 namespace Banana
 {
+	void FramebufferSpecs::AddTexture(FramebufferTexture texture)
+	{
+		if (texture != FramebufferTexture::Depth24Stencil8)
+			m_Textures.push_back(texture);
+		else
+			m_DepthTexture = texture;
+	}
+
 	Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecs& specs)
 	{
 		switch (RendererAPI::GetAPI())

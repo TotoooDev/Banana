@@ -89,7 +89,7 @@ namespace Banana
 		 */
 		std::string GetName() { return m_Name; }
 
-	// Type processing for constructor
+	// Constructor processing
 	private:
 		template <typename... Args>
 		static int LuaConstructor(lua_State* L)
@@ -123,7 +123,7 @@ namespace Banana
 				// Get the type at the current index and process it
 				using CurrentType = std::tuple_element_t<CurrentIndex, std::tuple<Args...>>;
 				CurrentType arg;
-				ProcessConstructorType<CurrentType>(L, &arg, CurrentIndex + 1);
+				ProcessTypeArgument<CurrentType>(L, &arg, CurrentIndex + 1);
 				std::get<CurrentIndex>(argumentsTuple) = arg;
 
 				// And BAM, recursive magic!
@@ -132,43 +132,8 @@ namespace Banana
 			}
 		}
 
-		template <typename T>
-		static void ProcessConstructorType(lua_State* L, T* var, unsigned int index)
-		{
-			BANANA_LUA_WARN("Unhandled type {} in constructor!", typeid(T).name());
-		}
-
-		template <>
-		static void ProcessConstructorType<float>(lua_State* L, float* var, unsigned int index)
-		{
-			double n = luaL_checknumber(L, index);
-			*var = (float)n;
-		}
-
-		template <>
-		static void ProcessConstructorType<bool>(lua_State* L, bool* var, unsigned int index)
-		{
-			// There is no luaL_checkboolean in the Lua library :(
-			luaL_argcheck(L, lua_isboolean(L, index), 1, "boolean expected");
-			bool b = lua_toboolean(L, index);
-			*var = b;
-		}
-
-		template <>
-		static void ProcessConstructorType<std::string>(lua_State* L, std::string* var, unsigned int index)
-		{
-			const char* str = luaL_checkstring(L, index);
-			*var = str;
-		}
-
-	// Functions stuff
+	// Functions processing
 	private:
-		template <typename ReturnType, typename... Args>
-		constexpr unsigned int GetArgumentCount(ReturnType(*f)(Args...))
-		{
-			return sizeof...(Args);
-		}
-
 		template <typename F>
 		struct FunctionCaller
 		{
@@ -179,10 +144,85 @@ namespace Banana
 		static int LuaFunction(lua_State* L)
 		{
 			FunctionCaller<F>* caller = (FunctionCaller<F>*)lua_touserdata(L, 1);
-			BANANA_LUA_INFO("The function has {} arguments", GetArgCount(caller->Function));
-			BANANA_LUA_INFO("The function takes {}", typeid(GetArgumentTypes(caller->Function)).name());
-			BANANA_LUA_INFO("The function returns {}", typeid(GetReturnType(caller->Function)).name());
+
+			auto argsTuple = GetArgumentTypes(caller->Function);
+			ProcessFunctionTypes<0>(L, argsTuple);
+
+			std::apply(caller->Function, argsTuple);
+
 			return 0;
+		}
+
+		template <unsigned int CurrentIndex, typename Tuple>
+		static void ProcessFunctionTypes(lua_State* L, Tuple& argumentsTuple)
+		{
+			if constexpr (CurrentIndex < std::tuple_size_v<Tuple>)
+			{
+				// Get the type at the current index and process it
+				using CurrentType = std::tuple_element_t<CurrentIndex, Tuple>;
+				CurrentType arg;
+				ProcessTypeArgument<CurrentType>(L, &arg, CurrentIndex + 1);
+				std::get<CurrentIndex>(argumentsTuple) = arg;
+
+				// And BAM, recursive magic!
+				// We increment the type index so we know where we are in the type list
+				ProcessFunctionTypes<CurrentIndex + 1>(L, argumentsTuple);
+			}
+		}
+
+	// Type processing
+	private:
+		template <typename T>
+		static void ProcessTypeArgument(lua_State* L, T* var, unsigned int index)
+		{
+			BANANA_LUA_WARN("Unhandled argument type {}!", typeid(T).name());
+		}
+
+		template <>
+		static void ProcessTypeArgument<float>(lua_State* L, float* var, unsigned int index)
+		{
+			double n = luaL_checknumber(L, index);
+			*var = (float)n;
+		}
+
+		template <>
+		static void ProcessTypeArgument<bool>(lua_State* L, bool* var, unsigned int index)
+		{
+			// There is no luaL_checkboolean in the Lua library :(
+			luaL_argcheck(L, lua_isboolean(L, index), 1, "boolean expected");
+			bool b = lua_toboolean(L, index);
+			*var = b;
+		}
+
+		template <>
+		static void ProcessTypeArgument<std::string>(lua_State* L, std::string* var, unsigned int index)
+		{
+			const char* str = luaL_checkstring(L, index);
+			*var = str;
+		}
+
+		template <typename T>
+		static void ProcessTypeReturn(lua_State* L, T value)
+		{
+			BANANA_LUA_WARN("Unhandled return type {}!", typeid(T).name());
+		}
+
+		template <>
+		static void ProcessTypeReturn<float>(lua_State* L, float value)
+		{
+			lua_pushnumber(L, (double)value);
+		}
+
+		template <>
+		static void ProcessTypeReturn<bool>(lua_State* L, bool value)
+		{
+			lua_pushboolean(L, value);
+		}
+
+		template <>
+		static void ProcessTypeReturn<std::string>(lua_State* L, std::string value)
+		{
+			lua_pushstring(L, value.c_str());
 		}
 
 	private:

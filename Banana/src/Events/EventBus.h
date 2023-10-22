@@ -52,14 +52,14 @@ namespace Banana
 
     typedef std::list<HandlerFunctionBase*> HandlerList;
     /**
-     * @brief The class that distributes all the published events to all the subscribers. You can subscribe a class to an event and the member function you passed when subscribing will get called when the event is published.
-     *        You are not limited to the base Banana events! You can absolutely create your own event by making them inherit the Event class.
+     * The class that distributes all the published events to all the subscribers. You can subscribe a class to an event and the member function you passed when subscribing will get called when the event is published.
+     * You are not limited to the base Banana events! You can absolutely create your own event by making them inherit the Event class.
      */
     class EventBus
     {
     public:
         /**
-         * @brief Publishes an event. All the classes subscribed to this event will get their member function called.
+         * Publishes an event. All the classes subscribed to this event will get their member function called.
          * @param event - The event that gets published.
          */
         template <typename EventType>
@@ -82,7 +82,7 @@ namespace Banana
         }
 
         /**
-         * @brief Subscribe a class to an event. When this event is published, the member function passed in parameter will get called.
+         * Subscribe a class to an event. When this event is published, the member function passed in parameter will get called.
          * @param instance - The instance of the class to subscribe.
          * @param MemberFunction - The member function that will get called when the event is published.
          */

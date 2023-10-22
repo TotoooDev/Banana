@@ -4,7 +4,9 @@
 
 namespace Banana
 {
-	// For testing purposes only
+	/**
+	 * STILL IN DEVELOPMENT
+	 */
 	class Script
 	{
 	public:

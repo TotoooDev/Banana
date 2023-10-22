@@ -6,6 +6,9 @@
 
 namespace Banana
 {
+	/**
+	 * Might rework this soon.
+	 */
 	class ScenePool
 	{
 	public:

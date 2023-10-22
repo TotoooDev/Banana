@@ -6,18 +6,9 @@
 
 namespace Banana
 {
-	/*
-	VertexLayout layout;
-	layout.AddAttribute(Vec3); // Position
-	layout.AddAttribute(Vec2); // Texture coords
-	layout.AddAttributeInstance(Mat4, numInstances); // Model matrix of each instance
-
-	VAO vao(layout);
-	vao.SetData(0, data); // Sets attribute 0 (here the Positions) to data
-	vao.SetData(1, data); // Sets attribute 0 (here the Texture coords) to data
-	vao.SetDataInstance(0, data);
-	*/
-
+	/**
+	 * Represents a type to use in a VertexObject because I was too lazy to work with templates.
+	 */
 	enum class Type
 	{
 		Float,
@@ -27,6 +18,9 @@ namespace Banana
 		Mat4
 	};
 
+	/**
+	 * Represents an attribute in the VertexLayout.
+	 */
 	struct Attribute
 	{
 		Type DataType;
@@ -35,17 +29,35 @@ namespace Banana
 		unsigned int NumData; // 1 for Float, 2 for Vec2, ...
 	};
 
-	// Specifies the layout of the vertex data in memory
+	/**
+	 * Specifies the layout of the vertex data in memory.
+	 * WARNING: Most of the instance methods are unfinished and do not work as of now!
+	 */
 	class VertexLayout
 	{
 	public:
+		/**
+		 * Adds an attribute to the layout.
+		 * @param type - The type of the attribute.
+		 */
 		void AddAttribute(Type type);
-		// WARNING: This is unfinished
+
 		void AddAttributeInstance(Type type, unsigned int num);
 
+	// Getters
+	public:
+		/**
+		 * @returns A vector of the atributes in the layout.
+		 */
 		std::vector<Attribute> GetAttributes() const { return m_Attributes; }
+
 		std::vector<Attribute> GetAttributesInstance() const { return m_AttributesInstance; }
+
+		/**
+		 * @returns The size in bytes of a single vertex using this layout.
+		 */
 		unsigned int GetVertexSize() const { return m_VertexSize; }
+
 		unsigned int GetInstanceSize() const { return m_InstanceSize; }
 		
 	private:
@@ -56,17 +68,48 @@ namespace Banana
 		unsigned int m_AttributeIndex = 0;
 	};
 
-	// OpenGL Vertex Array Object wrapper class
-	// You need to create a VertexLayout first to define the layout of your vertex data
+	/**
+	 * Provides an API for Vertex Buffer Objects
+	 */
 	class VAO
 	{
 	public:
+		/**
+		 * @returns The newly created VAO.
+		 * @param layout - The layout to use for this VAO.
+		 * @param numVertices - The number of vertices in the VAO.
+		 */
 		static Ref<VAO> Create(const VertexLayout& layout, unsigned int numVertices);
 
+		/**
+		 * Binds the VAO for future uses.
+		 */
+		virtual void Bind() = 0;
+
+		/**
+		 * @param attributeIndex - The index of the attribute in the layout.
+		 * @param data - The values to set the attribute to.
+		 */
 		virtual void SetData(unsigned int attributeIndex, std::vector<float> data) = 0;
+		/**
+		 * @param attributeIndex - The index of the attribute in the layout.
+		 * @param data - The values to set the attribute to.
+		 */
 		virtual void SetData(unsigned int attributeIndex, std::vector<glm::vec2> data) = 0;
+		/**
+		 * @param attributeIndex - The index of the attribute in the layout.
+		 * @param data - The values to set the attribute to.
+		 */
 		virtual void SetData(unsigned int attributeIndex, std::vector<glm::vec3> data) = 0;
+		/**
+		 * @param attributeIndex - The index of the attribute in the layout.
+		 * @param data - The values to set the attribute to.
+		 */
 		virtual void SetData(unsigned int attributeIndex, std::vector<glm::vec4> data) = 0;
+		/**
+		 * @param attributeIndex - The index of the attribute in the layout.
+		 * @param data - The values to set the attribute to.
+		 */
 		virtual void SetData(unsigned int attributeIndex, std::vector<glm::mat4> data) = 0;
 
 		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<float> data) = 0;
@@ -74,8 +117,6 @@ namespace Banana
 		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<glm::vec3> data) = 0;
 		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<glm::vec4> data) = 0;
 		virtual void SetDataInstance(unsigned int attributeIndex, std::vector<glm::mat4> data) = 0;
-
-		virtual void Bind() = 0;
 		
 		VertexLayout* GetLayout() { return &m_Layout; }
 
@@ -84,14 +125,30 @@ namespace Banana
 		VertexLayout m_Layout;
 	};
 
+	/**
+	 * Provides an API for Element Buffer Objects.
+	 */
 	class EBO
 	{
 	public:
+		/**
+		 * @returns The newly created EBO;
+		 */
 		static Ref<EBO> Create();
 
-		virtual void SetData(const std::vector<unsigned int>& indices) = 0;
+		/**
+		 * Binds the EBO for future uses.
+		 */
 		virtual void Bind() = 0;
 
+		/**
+		 * @param indices - The indices values.
+		 */
+		virtual void SetData(const std::vector<unsigned int>& indices) = 0;
+
+		/**
+		 * @returns The number of indices in the EBO.
+		 */
 		unsigned int GetCount() const { return m_Count; }
 		
 	protected:

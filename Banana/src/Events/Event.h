@@ -4,13 +4,13 @@
 namespace Banana
 {
     /**
-     * @brief The base event class.
+     * The base event class. All events published by the EventBus must inherit from this class.
      */
     class Event
     {
     public:
         /**
-         * @returns The name of the event.
+         * The name of the event.
          */
         std::string GetName()
         {
@@ -26,7 +26,7 @@ namespace Banana
         }
 
         /**
-         * @brief Sets the event as handled.
+         * Sets the event as handled.
          */
         void SetHandled()
         {
