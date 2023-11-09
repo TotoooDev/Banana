@@ -31,8 +31,6 @@ If you use Windows, you can simply open the solution file `Banana.sln` with Visu
 
 If you use Linux, simply open the whole folder in your favorite text editor.
 
-For the rest of this guide, we will refer to the name of the project as "GameProject".
-
 ## Project structure
 
 The directories are structured the following way:
@@ -48,6 +46,16 @@ Other files that can be useful:
 
 - `CreateProject` is a script that creates a new Banana project.
 - `GenerateProjects` is a script that regenerates all your project files. You need to run it when you add or delete any source file in your project.
+
+## The example scene
+
+Go into the folder named after your project. Under the `src` directory, there should be two files: `Game.cpp` and `ExampleScene.h`.
+
+The `Game.cpp` file defines the `CreateApplication` function that returns a pointer to an application. It creates a new application, creates a new scene and returns the the pointer to the application to Banana. You won't need to modify this file here.
+
+The `ExampleScene.h` contains, well, a scene example. Only two methods are defined: the constructor and a method named `OnWindowResized`, which handles the `WindowResized` event (for more information abour events, see the documentation of the `EventBus` class). This is the file (and class) where everything will take life.
+
+If you build and launch the projet now, you should see a magnificent black window appear on your screen. This is normal, because no entity was created yet.
 
 ---
 
