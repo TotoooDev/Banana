@@ -7,21 +7,21 @@ extern "C"
 {
 	static int lua_LogInfo(lua_State* L)
 	{
-		const char* str = lua_tostring(L, 1);
+		const char* str = luaL_tolstring(L, 1, nullptr);
 		BANANA_LUA_INFO(str);
 		return 0;
 	}
 
 	static int lua_LogWarn(lua_State* L)
 	{
-		const char* str = lua_tostring(L, 1);
+		const char* str = luaL_tolstring(L, 1, nullptr);
 		BANANA_LUA_WARN(str);
 		return 0;
 	}
 
 	static int lua_LogError(lua_State* L)
 	{
-		const char* str = lua_tostring(L, 1);
+		const char* str = luaL_tolstring(L, 1, nullptr);
 		BANANA_LUA_ERROR(str);
 		return 0;
 	}

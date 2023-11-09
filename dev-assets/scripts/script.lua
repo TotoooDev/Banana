@@ -1,3 +1,11 @@
-Banana = require("Banana")
+Banana = require "Banana"
 
-foo = new Foo.new(1.0, false, "str")
+function OnStart()
+    Banana.LogInfo("Starting!")
+end
+
+function OnUpdate(timestep)
+    transform = Banana.GetTransform()
+    translation = transform:GetTranslation()
+    Banana.LogInfo(translation)
+end

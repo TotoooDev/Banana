@@ -1,9 +1,11 @@
 #pragma once
 #include <Lua/Log.h>
-#include <lua/lua.hpp>
 #include <ArgumentTypes.h>
 #include <ReturnType.h>
 #include <ArgumentCount.h>
+#include <FunctionCaller.h>
+#include <Utils.h>
+#include <lua/lua.hpp>
 
 namespace Banana
 {
@@ -25,11 +27,13 @@ namespace Banana
 		LuaClass(lua_State* state, const std::string& name)
 			: m_State(state), m_Name(name)
 		{
-			// Create the global table
-			lua_newtable(m_State);
-			
-			// Create a metatable to differentiate between types
+			// Create a global metatable to differentiate between types
 			luaL_newmetatable(m_State, typeid(T).raw_name());
+
+			// Set the metatable for object-oriented access
+			lua_pushstring(m_State, "__index");
+			lua_pushvalue(m_State, -2);
+			lua_settable(m_State, -3);
 
 			// Set the default constructor that does nothing but create the userdatum
 			lua_pushcfunction(m_State, [](lua_State* L) -> int
@@ -60,25 +64,81 @@ namespace Banana
 		}
 
 		/**
-		 * Adds a function (method?) for the table-class.
+		 * Adds a function (method?) for the table-class. The return value of the function must be float, bool or std::string
 		 * @param name - The name of the function.
 		 * @param func - The function to call.
 		 */
-		template <typename Func>
-		void SetFunction(const std::string& name, Func func)
+		template <typename ReturnType, typename... Args>
+		void SetFunction(const std::string& name, ReturnType(*func)(Args...))
 		{
-			FunctionCaller<Func> caller;
-			caller.Function = func;
+			FunctionCaller<ReturnType(Args...)>* caller = new FunctionCaller<ReturnType(Args...)>(func);
 
 			lua_getglobal(m_State, m_Name.c_str());
 
 			// Push the caller object into Lua
-			lua_pushlightuserdata(m_State, &caller);
+			lua_pushlightuserdata(m_State, caller);
 			// Set it as a function
-			lua_pushcclosure(m_State, LuaFunction<Func>, 1);
+			lua_pushcclosure(m_State, LuaFunctionMember<ReturnType, Args...>, 1);
 			// Give it the name
 			lua_setfield(m_State, -2, name.c_str());
 
+			lua_setglobal(m_State, m_Name.c_str());
+
+			// WARNING: Absolute dogshit code design ahead
+			// Set the userdatum as a global variable in Lua
+			lua_pushlightuserdata(m_State, caller);
+			lua_setglobal(m_State, typeid(ReturnType(Args...)).raw_name());
+			// This is temporary, this is not the intended way of doing it
+			// When the user calls the function, it gets the global variable as a FunctionCaller pointer and calls the associated function.
+			// This is bad because:
+			// - global variable (ew)
+			// - Twice the memory usage
+			// - Global variable (noob) instead of table field (pro)
+			// But it works and I'm kinda sick of working on this fucking feature.
+
+			// Add the field to the metatable so the __index metamethod can find it
+			// This is so you can call a method using the foo:Bar() syntax
+			lua_getglobal(m_State, m_Name.c_str());
+			lua_getmetatable(m_State, 1);
+			lua_pushcclosure(m_State, LuaFunctionMember<ReturnType, Args...>, 1);
+			lua_setfield(m_State, -2, name.c_str());
+			lua_setglobal(m_State, m_Name.c_str());
+		}
+
+		template <typename ReturnType, typename Object, typename... Args>
+		void SetFunction(const std::string& name, ReturnType(Object::*func)(Args...))
+		{
+			FunctionCaller<ReturnType(Object::*)(Args...)>* caller = new FunctionCaller<ReturnType(Object::*)(Args...)>(func);
+
+			lua_getglobal(m_State, m_Name.c_str());
+
+			// Push the caller object into Lua
+			lua_pushlightuserdata(m_State, caller);
+			// Set it as a function
+			lua_pushcclosure(m_State, LuaFunctionMember<ReturnType, Object, Args...>, 1);
+			// Give it the name
+			lua_setfield(m_State, -2, name.c_str());
+
+			lua_setglobal(m_State, m_Name.c_str());
+
+			// WARNING: Absolute dogshit code design ahead
+			// Set the userdatum as a global variable in Lua
+			lua_pushlightuserdata(m_State, caller);
+			lua_setglobal(m_State, typeid(ReturnType(Args...)).raw_name());
+			// This is temporary, this is not the intended way of doing it
+			// When the user calls the function, it gets the global variable as a FunctionCaller pointer and calls the associated function.
+			// This is bad because:
+			// - global variable (ew)
+			// - Twice the memory usage
+			// - Global variable (noob) instead of table field (pro)
+			// But it works and I'm kinda sick of working on this fucking feature.
+
+			// Add the field to the metatable so the __index metamethod can find it
+			// This is so you can call a method using the foo:Bar() syntax
+			lua_getglobal(m_State, m_Name.c_str());
+			lua_getmetatable(m_State, 1);
+			lua_pushcclosure(m_State, LuaFunctionMember<ReturnType, Object, Args...>, 1);
+			lua_setfield(m_State, -2, name.c_str());
 			lua_setglobal(m_State, m_Name.c_str());
 		}
 
@@ -134,23 +194,44 @@ namespace Banana
 
 	// Functions processing
 	private:
-		template <typename F>
-		struct FunctionCaller
-		{
-			F Function;
-		};
-
-		template <typename F>
+		template <typename ReturnType, typename... Args>
 		static int LuaFunction(lua_State* L)
 		{
-			FunctionCaller<F>* caller = (FunctionCaller<F>*)lua_touserdata(L, 1);
+			lua_getglobal(L, typeid(ReturnType(Args...)).raw_name());
+			FunctionCaller<ReturnType(Args...)>* caller = (FunctionCaller<ReturnType(Args...)>*)lua_touserdata(L, -1);
 
-			auto argsTuple = GetArgumentTypes(caller->Function);
+			auto argsTuple = GetArgumentTypes(*(caller->Function));
 			ProcessFunctionTypes<0>(L, argsTuple);
 
-			std::apply(caller->Function, argsTuple);
+			std::apply(*(caller->Function), argsTuple);
 
 			return 0;
+		}
+
+		template <typename ReturnType, typename Object, typename... Args>
+		static int LuaFunctionMember(lua_State* L)
+		{
+			lua_getglobal(L, typeid(ReturnType(Args...)).raw_name());
+			FunctionCaller<ReturnType(Object::*)(Args...)>* caller = (FunctionCaller<ReturnType(Object::*)(Args...)>*)lua_touserdata(L, -1);
+		
+			// std::invoke inside of std::apply expects the first argument of a member function to be the pointer to the instance of the class.
+			// Here we create a tuple that looks like this: <T*, Args...>.
+			tuple_cat_t<std::tuple<T*>, decltype(GetArgumentTypes(caller->Function))> argsTuple;
+			ProcessFunctionTypes<0>(L, argsTuple);
+
+			// Lua expects the return value of the function to be the number of return values.
+			// If our function returns nothing, we push 0 onto the stack.
+			if constexpr (std::is_same_v<ReturnType, void>)
+			{
+				std::apply(caller->Function, argsTuple);
+				return 0;
+			}
+			else
+			{
+				ReturnType returnValue = std::apply(caller->Function, argsTuple);
+				ProcessTypeReturn(L, returnValue);
+				return 1;
+			}
 		}
 
 		template <unsigned int CurrentIndex, typename Tuple>
@@ -172,8 +253,8 @@ namespace Banana
 
 	// Type processing
 	private:
-		template <typename T>
-		static void ProcessTypeArgument(lua_State* L, T* var, unsigned int index)
+		template <typename Unhandled>
+		static void ProcessTypeArgument(lua_State* L, Unhandled* var, unsigned int index)
 		{
 			BANANA_LUA_WARN("Unhandled argument type {}!", typeid(T).name());
 		}
@@ -201,29 +282,42 @@ namespace Banana
 			*var = str;
 		}
 
-		template <typename T>
-		static void ProcessTypeReturn(lua_State* L, T value)
+		template <>
+		static void ProcessTypeArgument<T*>(lua_State* L, T** var, unsigned int index)
 		{
-			BANANA_LUA_WARN("Unhandled return type {}!", typeid(T).name());
+			T* t = (T*)luaL_checkudata(L, index, typeid(T).raw_name());
+			*var = t;
 		}
 
-		template <>
-		static void ProcessTypeReturn<float>(lua_State* L, float value)
+		template <typename Unhandled>
+		static void ProcessTypeReturn(lua_State* L, Unhandled value)
+		{
+			Unhandled* foo = (Unhandled*)lua_newuserdata(L, sizeof(Unhandled));
+			*foo = value;
+			luaL_newmetatable(L, typeid(Unhandled).raw_name());
+			lua_setmetatable(L, -2);
+		}
+
+		static void ProcessTypeReturn(lua_State* L, float value)
 		{
 			lua_pushnumber(L, (double)value);
 		}
 
-		template <>
-		static void ProcessTypeReturn<bool>(lua_State* L, bool value)
+		static void ProcessTypeReturn(lua_State* L, bool value)
 		{
 			lua_pushboolean(L, value);
 		}
 
-		template <>
-		static void ProcessTypeReturn<std::string>(lua_State* L, std::string value)
+		static void ProcessTypeReturn(lua_State* L, std::string value)
 		{
 			lua_pushstring(L, value.c_str());
 		}
+
+	// Utils
+	private:
+		// Cool one-liner to concatenate tuples from their types only
+		// From https://stackoverflow.com/a/53398815.
+		template<typename ... input_t> using tuple_cat_t = decltype(std::tuple_cat(std::declval<input_t>()...));
 
 	private:
 		lua_State* m_State;

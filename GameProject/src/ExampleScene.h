@@ -17,10 +17,6 @@ class ExampleScene : public Scene
 public:
 	ExampleScene()
 	{
-		Script::Init();
-		Script script("scripts/script.lua");
-		script.Run();
-
 		Application::Get()->GetRenderer()->SetProjection(45.0f, 1280.0f / 720.0f, 0.1f, 100.0f);
 		Application::Get()->GetWindow()->ToggleMouseLocking(true);
 
@@ -28,8 +24,10 @@ public:
 		RigidBody planeRigidBody = m_PhysicsWorld->CreateRigidBody(RigidBodyType::Static, glm::vec3(0.0f, -5.0f, 0.0f));
 		planeRigidBody.AddBoxCollider(glm::vec3(20.0f, 0.0f, 20.0f));
 
+		Script::Init();
 		m_Model = CreateEntity("Model");
 		m_Model.AddComponent<BananaComponent>(m_Model, this);
+		m_Model.AddComponent<LuaScriptComponent>("scripts/script.lua", m_Model);
 
 		m_Camera = CreateEntity("Camera");
 		m_Camera.AddComponent<ThirdPersonCameraComponent>(m_Camera, this);

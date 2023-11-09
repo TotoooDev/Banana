@@ -69,6 +69,15 @@ namespace Banana
 			if (script.OnUpdate)
 				script.OnUpdate(ent, this, timestep);
 		}
+
+		auto luaScriptView = m_Registry.view<LuaScriptComponent>();
+		for (auto&& [entity, script] : luaScriptView.each())
+		{
+			if (!script.LuaScript.HasStarted())
+				script.LuaScript.OnStart();
+			if (!script.LuaScript.HasError())
+				script.LuaScript.OnUpdate(timestep);
+		}
 	}
 
 	void Scene::Physics(double timestep)

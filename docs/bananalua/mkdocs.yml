@@ -1,0 +1,27 @@
+site_name: Banana User Guide 🍌
+
+nav:
+  - 'Home': 'index.md'
+  - 'Get started':
+    - 'Getting ready': 'get_started/getting_ready.md'
+    - 'Your first entity': 'get_started/the_first_entity.md'
+    - 'Scripts': 'get_started/scripts.md'
+    - 'Custom components': 'get_started/custom_components.md'
+  - 'Building the documentation': 'documentation.md'
+  - 'Components specifiation':
+    - 'Vec3': 'components/Vec3.md'
+    - 'Transform': 'components/Transform.md'
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+  logo: images/banana_smol.png
+  favicon: images/banana_smol.png
+
+repo_url: https://github.com/TotoooDev/Banana
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences

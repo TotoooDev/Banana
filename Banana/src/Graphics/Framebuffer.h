@@ -9,6 +9,7 @@ namespace Banana
 	 */
 	enum class FramebufferTexture
 	{
+		None, /** No texture */
 		RGBA8, /** An 8-bit per channel RGBA color. */
 		RGBA16, /** A 16-bit per channel RGBA color. */
 		RGBA16F, /** A 16-bit per channel RGBA color (floating point). */

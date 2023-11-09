@@ -190,6 +190,7 @@ project "GameProject"
 	}
 	
 	links ("Banana")
+	dependson { "Banana", "BananaLua" }
 	
 	filter "system:windows"
 		staticruntime "off"

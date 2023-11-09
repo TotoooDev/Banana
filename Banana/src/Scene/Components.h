@@ -7,6 +7,7 @@
 #include <Graphics/Material.h>
 #include <Graphics/Model.h>
 #include <Graphics/Light.h>
+#include <Lua/Script.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <functional>
@@ -166,6 +167,16 @@ namespace Banana
 
 		ScriptableComponent() {}
 		ScriptableComponent(const ScriptableComponent&) = default;
+	};
+
+	struct LuaScriptComponent
+	{
+		Script LuaScript;
+
+		LuaScriptComponent(const std::string& path, Entity ent)
+			: LuaScript(path, ent)
+		{}
+		LuaScriptComponent(const LuaScriptComponent&) = default;
 	};
 
 	struct ImGuiComponent
