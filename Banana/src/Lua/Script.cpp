@@ -1,6 +1,7 @@
 #include <Lua/Log.h>
 #include <Lua/Script.h>
 #include <lua/lua.hpp>
+#include <Classes/LuaTransform.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace Banana
@@ -74,5 +75,19 @@ namespace Banana
 			BANANA_LUA_ERROR(lua_tostring(m_State, -1));
 			m_HasError = true;
 		}
+	}
+
+	TransformComponent* Script::GetTransformComponent()
+	{
+		lua_getglobal(m_State, LuaTransform::GetName().c_str());
+		LuaTransform* luaTransform = (LuaTransform*)lua_touserdata(m_State, -1);
+		return luaTransform->GetComponent();
+	}
+
+	void Script::SetTransformComponent(const TransformComponent& comp)
+	{
+		lua_getglobal(m_State, LuaTransform::GetName().c_str());
+		LuaTransform* luaTransform = (LuaTransform*)lua_touserdata(m_State, -1);
+		luaTransform->SetComponent(comp);
 	}
 }

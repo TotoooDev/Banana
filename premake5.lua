@@ -45,7 +45,9 @@ project "Banana"
 	{
 		"Banana/src",
 		"Banana/src/Banana",
-		"Banana/src/vendor"
+		"Banana/src/vendor",
+		"BananaLua/src",
+		"BananaLua/src/vendor"
 	}
 
 	-- If the project is generated on Windows it will apply these rules

@@ -1,5 +1,6 @@
 #pragma once
 #include <Scene/Entity.h>
+#include <Scene/Components.h>
 #include <string>
 #include <lua/lua.hpp>
 
@@ -30,6 +31,9 @@ namespace Banana
 		bool HasError() { return m_HasError; }
 
 		lua_State* GetState() { return m_State; }
+		TransformComponent* GetTransformComponent();
+
+		void SetTransformComponent(const TransformComponent& comp);
 
 	private:
 		lua_State* m_State;

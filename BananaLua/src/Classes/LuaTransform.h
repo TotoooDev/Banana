@@ -53,7 +53,7 @@ namespace Banana
 	public:
 		static void Bind(lua_State* L)
 		{
-			LuaClass<LuaTransform> luaClass(L, "Transform");
+			LuaClass<LuaTransform> luaClass(L, m_Name);
 			luaClass.SetConstructor<>();
 			luaClass.SetFunction("GetTranslation", &LuaTransform::GetTranslation);
 			luaClass.SetFunction("GetRotation", &LuaTransform::GetTranslation);
@@ -68,7 +68,7 @@ namespace Banana
 			lua_getglobal(L, "Entity");
 			Entity* ent = (Entity*)lua_touserdata(L, -1);
 			TransformComponent& comp = ent->GetComponent<TransformComponent>();
-			LuaTransform transform(comp);
+			LuaTransform transform(&comp);
 			LuaTransform* transformUserdata = (LuaTransform*)lua_newuserdata(L, sizeof(LuaTransform));
 			*transformUserdata = transform;
 			luaL_newmetatable(L, typeid(LuaTransform).raw_name());
@@ -76,27 +76,36 @@ namespace Banana
 			return 1;
 		}
 
+		static std::string GetName()
+		{
+			return m_Name;
+		}
+
 	public:
 		LuaTransform()
 		{
-			m_Component.Translation = glm::vec3(0.0f);
-			m_Component.Rotation = glm::vec3(0.0f);
-			m_Component.Scale = glm::vec3(1.0f);
+			m_Component->Translation = glm::vec3(0.0f);
+			m_Component->Rotation = glm::vec3(0.0f);
+			m_Component->Scale = glm::vec3(1.0f);
 		}
 
-		LuaTransform(const TransformComponent& comp)
+		LuaTransform(TransformComponent* comp)
 			: m_Component(comp)
 		{}
 
-		Vec3 GetTranslation() { return m_Component.Translation; }
-		Vec3 GetRotation() { return m_Component.Rotation; }
-		Vec3 GetScale() { return m_Component.Scale; }
+		TransformComponent* GetComponent() { return m_Component; }
+		void SetComponent(const TransformComponent& comp) { *m_Component = comp; }
 
-		void SetTranslation(Vec3 vec) { m_Component.Translation = glm::vec3(vec.x, vec.y, vec.z); }
-		void SetRotation(Vec3 vec) { m_Component.Rotation = glm::vec3(vec.x, vec.y, vec.z); }
-		void SetScale(Vec3 vec) { m_Component.Scale = glm::vec3(vec.x, vec.y, vec.z); }
+		Vec3 GetTranslation() { return m_Component->Translation; }
+		Vec3 GetRotation() { return m_Component->Rotation; }
+		Vec3 GetScale() { return m_Component->Scale; }
+
+		void SetTranslation(Vec3 vec) { m_Component->Translation = glm::vec3(vec.x, vec.y, vec.z); }
+		void SetRotation(Vec3 vec) { m_Component->Rotation = glm::vec3(vec.x, vec.y, vec.z); }
+		void SetScale(Vec3 vec) { m_Component->Scale = glm::vec3(vec.x, vec.y, vec.z); }
 
 	private:
-		TransformComponent m_Component;
+		TransformComponent* m_Component;
+		static constexpr std::string m_Name = "Transform";
 	};
 }

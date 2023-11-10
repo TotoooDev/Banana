@@ -73,10 +73,19 @@ namespace Banana
 		auto luaScriptView = m_Registry.view<LuaScriptComponent>();
 		for (auto&& [entity, script] : luaScriptView.each())
 		{
+			Entity ent(entity);
+			if (ent.HasComponent<TransformComponent>())
+				script.LuaScript.SetTransformComponent(ent.GetComponent<TransformComponent>());
+
 			if (!script.LuaScript.HasStarted())
 				script.LuaScript.OnStart();
+
 			if (!script.LuaScript.HasError())
 				script.LuaScript.OnUpdate(timestep);
+
+			// Update components
+			if (ent.HasComponent<TransformComponent>())
+				ent.GetComponent<TransformComponent>() = *script.LuaScript.GetTransformComponent();
 		}
 	}
 
