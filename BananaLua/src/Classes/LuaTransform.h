@@ -93,9 +93,6 @@ namespace Banana
 			: m_Component(comp)
 		{}
 
-		TransformComponent* GetComponent() { return m_Component; }
-		void SetComponent(const TransformComponent& comp) { *m_Component = comp; }
-
 		Vec3 GetTranslation() { return m_Component->Translation; }
 		Vec3 GetRotation() { return m_Component->Rotation; }
 		Vec3 GetScale() { return m_Component->Scale; }

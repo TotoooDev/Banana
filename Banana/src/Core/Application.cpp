@@ -12,12 +12,8 @@ namespace Banana
 	Application::Application(const WindowSpecs& specs)
 		: m_Window(specs, &m_EventBus)
 	{
-		if (m_Instance)
-		{
-			// An application already exists so we panic
-			BANANA_ABORT("An application already exists! You can only create one application at the time.");
-			return;
-		}
+		// We only want one instance of the application at a time
+		BANANA_ASSERT(!m_Instance, "An application already exists! You can only create one application at the time.");
 		m_Instance = this;
 
 		// spdlog setup
@@ -66,6 +62,7 @@ namespace Banana
 	{
 		if (m_CurrentScene)
 			m_CurrentScene->OnReplaced();
+
 		m_CurrentScene = scene;
 		m_CurrentScene->OnSetAsCurrent();
 	}

@@ -26,6 +26,7 @@ public:
 
 		Script::Init();
 		m_Model = CreateEntity("Model");
+		m_Model.AddComponent<TransformComponent>();
 		m_Model.AddComponent<BananaComponent>(m_Model, this);
 		m_Model.AddComponent<LuaScriptComponent>("scripts/script.lua", m_Model);
 

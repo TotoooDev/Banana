@@ -2,6 +2,7 @@
 #include <Lua/Script.h>
 #include <lua/lua.hpp>
 #include <Classes/LuaTransform.h>
+#include <Utils.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace Banana
@@ -21,18 +22,19 @@ namespace Banana
 
 		luaL_openlibs(m_State);
 
-		// Load the script file
-		BANANA_LUA_INFO("Loading script {}...", path);
-		int ret = luaL_dofile(m_State, path.c_str());
-		if (ret != LUA_OK)
-			BANANA_LUA_ERROR("Failed to load {}!", path);
-
 		// Set the entity userdatum
 		Entity* entUserdata = (Entity*)lua_newuserdata(m_State, sizeof(Entity));
 		*entUserdata = ent;
 		luaL_newmetatable(m_State, typeid(Entity).raw_name());
 		lua_setmetatable(m_State, -2);
 		lua_setglobal(m_State, "Entity");
+
+		// Load the script file
+		BANANA_LUA_INFO("Loading script {}...", path);
+		int ret = luaL_dofile(m_State, path.c_str());
+		if (ret != LUA_OK)
+			BANANA_LUA_ERROR("Failed to load {}!", path);
+
 	}
 	
 	Script::~Script()
@@ -77,17 +79,36 @@ namespace Banana
 		}
 	}
 
-	TransformComponent* Script::GetTransformComponent()
+	void Script::DumpStack()
 	{
-		lua_getglobal(m_State, LuaTransform::GetName().c_str());
-		LuaTransform* luaTransform = (LuaTransform*)lua_touserdata(m_State, -1);
-		return luaTransform->GetComponent();
-	}
+		BANANA_LUA_INFO("Beginning stack dump!");
 
-	void Script::SetTransformComponent(const TransformComponent& comp)
-	{
-		lua_getglobal(m_State, LuaTransform::GetName().c_str());
-		LuaTransform* luaTransform = (LuaTransform*)lua_touserdata(m_State, -1);
-		luaTransform->SetComponent(comp);
+		int top = lua_gettop(m_State);
+		for (int i = 1; i <= top; i++)
+		{
+			std::string str = std::to_string(i) + ": " + std::string(luaL_typename(m_State, i)) + " = ";
+			switch (lua_type(m_State, i))
+			{
+			case LUA_TNUMBER:
+				str += std::to_string(lua_tonumber(m_State, i));
+				break;
+			case LUA_TSTRING:
+				str += lua_tostring(m_State, i);
+				break;
+			case LUA_TBOOLEAN:
+				str += lua_toboolean(m_State, i) ? "true" : "false";
+				break;
+			case LUA_TNIL:
+				str += "nil";
+				break;
+			default:
+				str += std::to_string((unsigned int)lua_topointer(m_State, i));
+				break;
+			}
+
+			BANANA_LUA_INFO(str);
+		}
+
+		BANANA_LUA_INFO("Stack dump over.");
 	}
 }

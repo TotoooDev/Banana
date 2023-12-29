@@ -1,18 +1,18 @@
 #pragma once
 #include <Scene/Entity.h>
-#include <Scene/Components.h>
 #include <string>
 #include <lua/lua.hpp>
 
 namespace Banana
 {
+	struct TransformComponent;
+
 	/**
 	 * STILL IN DEVELOPMENT, THIS IS UNSTABLE AND SUBJECT TO CHANGE
 	 * A wrapper around a Lua script.
 	 * You need to define two functions for the script to run properly:
 	 * - `OnStart` gets called once when the script is created.
 	 * - `OnUpdate` gets called every loop.
-	 * See the BananaLua documentation dor more details.
 	 */
 	class Script
 	{
@@ -31,9 +31,9 @@ namespace Banana
 		bool HasError() { return m_HasError; }
 
 		lua_State* GetState() { return m_State; }
-		TransformComponent* GetTransformComponent();
 
-		void SetTransformComponent(const TransformComponent& comp);
+	private:
+		void DumpStack();
 
 	private:
 		lua_State* m_State;

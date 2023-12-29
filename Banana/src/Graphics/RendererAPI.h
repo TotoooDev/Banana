@@ -164,6 +164,8 @@ namespace Banana
 		void AddPointLight(Ref<Shader> shader, const PointLight& light, glm::vec3 pos);
 		void AddSpotLight(Ref<Shader> shader, const SpotLight& light, glm::vec3 pos, glm::vec3 direction);
 
+		static std::string APINameToString(RendererAPIName api);
+
 	private:
 		static RendererAPIName m_API;
 

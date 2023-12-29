@@ -20,7 +20,7 @@ namespace Banana
 			BANANA_ABORT("Vulkan is not supported yet :(");
 		case RendererAPIName::None:
 		default:
-			BANANA_ABORT("Unsupported renderer API {}!", (int)api);
+			BANANA_ABORT("Unsupported renderer API {}!", APINameToString(api));
 		}
 
 		return nullptr;
@@ -139,5 +139,19 @@ namespace Banana
 
 		m_NumLights++;
 		shader->SetInt(m_NumLights, "uNumLights");
+	}
+
+	std::string RendererAPI::APINameToString(RendererAPIName api)
+	{
+		switch (api)
+		{
+		case RendererAPIName::OpenGL:
+			return "OpenGL";
+		case RendererAPIName::Vulkan:
+			return "Vulkan";
+		case RendererAPIName::None:
+		default:
+			return "Unknown API";
+		}
 	}
 }
